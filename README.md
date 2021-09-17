@@ -1,14 +1,15 @@
-## ×ª»»³Écurd setting API Ê¹ÓÃ
+## è½¬æ¢æˆcurd setting API ä½¿ç”¨
 
-    - endpoint: ±ØÌî
-    - originApi: ±ØÌî
-    - createPageApi: ±ØÌî
-    - addFieldApi: ±ØÌî
-    - token: ¿ÉÑ¡
 ```
 POST /createpage
 
-//Ìá½»Êı¾İ¸ñÊ½
+    - endpoint: å¿…å¡«
+    - originApi: å¿…å¡«
+    - createPageApi: å¿…å¡«
+    - addFieldApi: å¿…å¡«
+    - token: å¯é€‰
+
+//æäº¤æ•°æ®æ ¼å¼
 
 {
     "endpoint": "https://api.xiaojiuban.smallsaas.cn",
