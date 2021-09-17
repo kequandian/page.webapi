@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PageConfig.WebApi.Controllers.ApiHandle;
 using PageConfig.WebApi.utils;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,11 @@ namespace PageConfig.WebApi.Controllers
 
         private static ApiTools tool = new ApiTools();
 
+        private string endpoint = "";
+        private string originUrl = "";
+        private string createPageUrl = "";
+        private string addFieldUrl = "";
+
 
         private readonly ILogger<OriginDataController> _logger;
 
@@ -29,23 +35,45 @@ namespace PageConfig.WebApi.Controllers
         /// 获取原始数据并创建页面
         /// </summary>
         /// <param name="requestData"></param>
-        [Route("/getdata")]
+        [Route("/createpage")]
         [HttpPost]
-        public HttpResponseMessage GetData(dynamic requestData)
+        public HttpResponseMessage CreatePage(dynamic requestData)
         {
             try
             {
                 dynamic obj = JsonConvert.DeserializeObject(Convert.ToString(requestData));
                 string jsonString = JsonConvert.SerializeObject(obj);
                 JObject jsonData = (JObject)JsonConvert.DeserializeObject(jsonString);
-                
-                if(jsonData["path"] == null)
+
+                if (jsonData["endpoint"] == null)
                 {
-                    return tool.MsgFormat(ResponseCode.操作失败, "缺少 path 参数", "Error");
+                    return tool.MsgFormat(ResponseCode.操作失败, "缺少 endpoint 参数", "Error");
                 }
-                string path = jsonData["path"].ToString();
+
+                if (jsonData["originApi"] == null)
+                {
+                    return tool.MsgFormat(ResponseCode.操作失败, "缺少 originApi 参数", "Error");
+                }
+
+                if (jsonData["createPageApi"] == null)
+                {
+                    return tool.MsgFormat(ResponseCode.操作失败, "缺少 createPageApi 参数", "Error");
+                }
+
+                if (jsonData["addFieldApi"] == null)
+                {
+                    return tool.MsgFormat(ResponseCode.操作失败, "缺少 addFieldApi 参数", "Error");
+                }
+
+                endpoint = jsonData["endpoint"].ToString();
+                originUrl = string.Format("{0}{1}", endpoint, jsonData["originApi"].ToString()); 
+                createPageUrl = string.Format("{0}{1}", endpoint, jsonData["createPageApi"].ToString()); 
+                addFieldUrl = string.Format("{0}{1}", endpoint, jsonData["addFieldApi"].ToString());
+
                 string token = jsonData["token"] != null ? jsonData["token"].ToString(): "";
-                JObject resJO = getOriginData(path,token);
+
+                JObject resJO = getOriginData(originUrl, token);
+
                 var status = resJO["code"] != null ? Convert.ToInt32(resJO["code"]) : 0;
                 if (status == 200)
                 {
@@ -53,20 +81,44 @@ namespace PageConfig.WebApi.Controllers
                     if (resJO.ContainsKey(resultinfo_key))
                     {
                         JObject info = (JObject)resJO[resultinfo_key];
-                        int pageId = createPage();
-                        if(pageId > 0)
+                        int pageId = createPage(createPageUrl);
+                        //int pageId = 15;
+                        if (pageId > 0)
                         {
                             Console.WriteLine("添加字段");
-                            //foreach (var item in info)
-                            //{
-                                //addPageField(item[""].ToString(), pageId);
-                            //}
+                            int errCount = 0;
+                            string fieldName = "";
+                            foreach (var item in info)
+                            {
+                                fieldName = item.Key; 
+                                var fieldValue = item.Value;
+                                int pId = pageId;
+                                if (!fieldName.Equals("id"))
+                                {
+                                    int addStatus = addPageField(addFieldUrl, fieldName, pId);
+                                    if (addStatus == 1)
+                                    {
+                                        errCount++;
+                                    }
+                                    if (errCount > 0)
+                                    {
+                                        return tool.MsgFormat(ResponseCode.操作失败, string.Format("添加 {0} 字段失败", fieldName), "Error");
+                                    }
+                                }
+                                
+                            }
+                            
                         }
                         else
                         {
                             return tool.MsgFormat(ResponseCode.操作失败, "创建页面失败, 获取pageId异常", "Error");
                         }
-                        return tool.MsgFormatToJson(ResponseCode.成功, info, "Success");
+
+                        JObject pageDetailJO = getPageDetail(createPageUrl, pageId);
+                        //return tool.MsgFormatToJson(ResponseCode.成功, "创建成功", "Success");
+                        string convertString =  toConfig(pageDetailJO);
+
+                        return tool.MsgFormatToJson(ResponseCode.成功, convertString, "Success");
 
                     }
                     else
@@ -118,17 +170,20 @@ namespace PageConfig.WebApi.Controllers
         /// 创建页面获取pageId
         /// </summary>
         /// 
-        static int createPage()
+        static int createPage(string url)
         {
+
+            string testUrl = "http://192.168.3.204:8000/api/crud/lowMainPage/lowMainPages";
+
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
             using (var http = new HttpClient(handler))
             {
-                string url = "http://192.168.3.189:7000/api/crud/lowMainPage/lowMainPages";
+                string requestUrl = testUrl;
                 string jsonString = "{\"apiEndpoint\":\"string\",\"columnAlign\":\"string\",\"contentItemContainerStyle\":\"string\",\"contentItems\":\"string\",\"contentLayout\":\"string\",\"formAddFields\":\"string\",\"formAddTitle\":\"string\",\"formDefaultContentLayout\":\"string\",\"formDefaultWidth\":0,\"formEditFields\":\"string\",\"formEditTitle\":\"string\",\"formViewFields\":\"string\",\"formViewTitle\":\"string\",\"listFields\":\"string\",\"listOperationFields\":\"string\",\"pageTitle\":\"string\"}";
                 HttpContent content = new StringContent(jsonString);
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                var task = http.PostAsync(url, content);
+                var task = http.PostAsync(requestUrl, content);
                 var rep = task.Result;
                 var task2 = rep.Content.ReadAsStringAsync();
 
@@ -140,7 +195,7 @@ namespace PageConfig.WebApi.Controllers
                     if (resJO.ContainsKey(resultinfo_key))
                     {
                         JObject info = (JObject)resJO[resultinfo_key];
-                        return int.Parse(info["page"].ToString());
+                        return int.Parse(info["id"].ToString());
                     }
                     else
                     {
@@ -158,18 +213,50 @@ namespace PageConfig.WebApi.Controllers
         /// 添加页面字段
         /// </summary>
         /// 
-        static int addPageField(string fieldName, int pageId)
+        static int addPageField(string url, string fieldName, int pageId)
         {
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
+            string testUrl = "http://192.168.3.204:8000/api/crud/lowFields/lowFieldses";
+
             using (var http = new HttpClient(handler))
             {
-                string url = "http://192.168.3.189:7000/api/crud/lowFields/lowFieldses";
+                string requestUrl = testUrl;
 
-                string postContent = "{\"listColumnMultiKeys\": \"null\",\"listColumnMultiType\": \"null\",\"fieldBinding\": " + fieldName  + ", \"listColumnWidth\": 0,\"listColumnKey\": \"null\",\"fieldValueOptions\": \"null\",\"formInputType\": \"input\",\"formViewType\": \"plain\",\"listFontSize\": 0,\"fieldScopes\": \"page,table,edit,add,view\",\"formFieldQuestion\": \"null\",\"fieldItemName\": " + fieldName  + ",\"fieldValueFilter\": \"null\",\"formFieldHint\": \"null\",\"listFontColor\": \"null\",\"fieldLabel\": " + fieldName  + ",\"formFieldTips\": \"null\",\"listColumnLayout\": \"null\",\"formFieldTitle\": " + fieldName  + ",\"formViewOptions\": \"null\",\"listColumnOptions\": \"null\",\"pageId\": " + pageId + ", //需要api生成pageID\"listFontWeight\": \"null\",\"listColumnFormat\": \"null\",\"listColumnAlign\": \"left\", //left, center, right     \"listColumnName\": " + fieldName  + ",\"formInputOptions\": \"null\",\"formInputRequired\": 0,\"listColumnType\": \"plain\",\"listColumnReference\": \"null\" }";
-                HttpContent content = new StringContent(postContent);
+                JObject postJO = new JObject();
+                postJO.Add("listColumnMultiKeys", ""); 
+                postJO.Add("fieldBinding", fieldName);
+                postJO.Add("listColumnWidth", 0);
+                postJO.Add("listColumnKey", "");
+                postJO.Add("fieldValueOptions", "");
+                postJO.Add("formInputType", "input");
+                postJO.Add("formViewType", "plain");
+                postJO.Add("listFontSize", 0);
+                postJO.Add("fieldScopes", "page,table,edit,add,view");
+                postJO.Add("formFieldQuestion", "");
+                postJO.Add("fieldItemName", fieldName);
+                postJO.Add("fieldValueFilter", "");
+                postJO.Add("formFieldHint", "");
+                postJO.Add("listFontColor", "");
+                postJO.Add("fieldLabel", fieldName);
+                postJO.Add("formFieldTips", "");
+                postJO.Add("listColumnLayout", "");
+                postJO.Add("formFieldTitle", fieldName);
+                postJO.Add("formViewOptions", "");
+                postJO.Add("listColumnOptions", "");
+                postJO.Add("pageId", pageId);
+                postJO.Add("listFontWeight", "");
+                postJO.Add("listColumnFormat", "");
+                postJO.Add("listColumnAlign", "left");
+                postJO.Add("listColumnName", fieldName);
+                postJO.Add("formInputOptions", "");
+                postJO.Add("formInputRequired", 0);
+                postJO.Add("listColumnType", "plain");
+                postJO.Add("listColumnReference", "");
+
+                HttpContent content = new StringContent(postJO.ToString());
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-                var task = http.PostAsync(url, content);
+                var task = http.PostAsync(requestUrl, content);
                 var rep = task.Result;
                 var task2 = rep.Content.ReadAsStringAsync();
 
@@ -186,5 +273,121 @@ namespace PageConfig.WebApi.Controllers
             }
         }
 
+
+        /// <summary>
+        /// 根据pageId获取页面详情
+        /// </summary>
+        /// 
+        static JObject getPageDetail(string url, int pageId)
+        {
+            var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
+
+            string testUrl = string.Format("http://192.168.3.204:8000/api/crud/lowMainPage/lowMainPages/{0}", pageId);
+
+            using (var http = new HttpClient(handler))
+            {
+                //string requestUrl = string.Format("{0}/{1}", url, pageId);
+                string requestUrl = testUrl;
+
+                var task = http.GetAsync(requestUrl);
+                var rep = task.Result;
+                var task2 = rep.Content.ReadAsStringAsync();
+
+                JObject resJO = (JObject)JsonConvert.DeserializeObject(task2.Result);
+                var status = resJO["code"] != null ? Convert.ToInt32(resJO["code"]) : 0;
+                if (status == 200)
+                {
+                    const string resultinfo_key = "data";
+                    if (resJO.ContainsKey(resultinfo_key))
+                    {
+                        return (JObject)resJO[resultinfo_key];
+                    }
+                    return null;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 转换成crud-setting json
+        /// </summary>
+        /// <param name="pageJson"></param>
+        private string toConfig(dynamic pageJson)
+        {
+            PageConfigHandle handle = new PageConfigHandle();
+            try
+            {
+                JObject bodyContent = new JObject();
+                bodyContent.Add("columns", 1);
+                JObject pageNameJO = new JObject(); //页面标题
+                JArray createFieldsJO = new JArray(); //新增页面配置
+                JArray updateFieldsJO = new JArray(); //编辑页面配置
+                JObject layoutJO = new JObject();
+
+                JArray tableFieldsJO = new JArray();//列表显示字段
+                JArray tableActionsJO = new JArray(); //列表页--列表上方按钮
+                JArray tableOperationJO = new JArray();//列表页--列表项操作按钮
+                JArray searchFieldsJO = new JArray();//搜索栏
+                JArray viewConfigJO = new JArray();//详情
+
+                dynamic obj = JsonConvert.DeserializeObject(Convert.ToString(pageJson));
+                //Console.WriteLine("obj = {0}", obj);
+                string jsonString = JsonConvert.SerializeObject(obj);
+                JObject jsonData = (JObject)JsonConvert.DeserializeObject(jsonString);
+
+                //标题
+                pageNameJO.Add("table", jsonData["pageTitle"].ToString());
+                pageNameJO.Add("new", jsonData["formAddTitle"].ToString());
+                pageNameJO.Add("edit", jsonData["formEditTitle"].ToString());
+
+                string apiEndpoint = jsonData["apiEndpoint"].ToString();
+                //访问api
+                bodyContent.Add("listAPI", apiEndpoint);
+                bodyContent.Add("createAPI", apiEndpoint);
+                bodyContent.Add("getAPI", string.Format("{0}/[id]", apiEndpoint));
+                bodyContent.Add("updateAPI", string.Format("{0}/[id]", apiEndpoint));
+                bodyContent.Add("deleteAPI", string.Format("{0}/(id)", apiEndpoint));
+
+                //layout
+                layoutJO.Add("table", jsonData["contentLayout"].ToString());
+                layoutJO.Add("form", jsonData["formDefaultContentLayout"].ToString());
+
+                //列表
+                tableFieldsJO = handle.handleFieldsConf((JArray)jsonData["lowFieldss"]);
+                //搜索
+                searchFieldsJO = handle.handleSearchConf((JArray)jsonData["lowFilterss"]);
+                //actions
+                tableActionsJO = handle.handleActionsConf((JArray)jsonData["lowActionss"]);
+                //操作栏
+                tableOperationJO = handle.handleOperationConf((JArray)jsonData["lowOperationss"]);
+                //新增
+                createFieldsJO = handle.handleCreateConf((JArray)jsonData["lowFieldss"], "add");
+                //编辑
+                updateFieldsJO = handle.handleCreateConf((JArray)jsonData["lowFieldss"], "edit");
+                //详情
+                viewConfigJO = handle.handleViewConf((JArray)jsonData["lowFieldss"]);
+
+                bodyContent.Add("pageName", pageNameJO);
+                bodyContent.Add("createFields", createFieldsJO);
+                bodyContent.Add("updateFields", updateFieldsJO);
+                bodyContent.Add("layout", layoutJO);
+                bodyContent.Add("tableActions", tableActionsJO);
+                bodyContent.Add("tableOperation", tableOperationJO);
+                bodyContent.Add("searchFields", searchFieldsJO);
+                bodyContent.Add("tableFields", tableFieldsJO);
+                bodyContent.Add("viewConfig", viewConfigJO);
+
+                return bodyContent.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+
+        }
     }
 }

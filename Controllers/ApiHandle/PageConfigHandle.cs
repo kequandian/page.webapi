@@ -49,6 +49,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #region 搜索栏
         public JArray handleSearchConf(JArray listFields)
         {
+
+            if (listFields == null)
+            {
+                return null;
+            }
             JArray searchFields = new JArray();
             JObject searchFieldItem = null;
             if (listFields.ToString().StartsWith("[") && listFields.ToString().EndsWith("]")) //判断是否是Json 数组
@@ -74,6 +79,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #region actions
         public JArray handleActionsConf(JArray listFields)
         {
+
+            if (listFields == null)
+            {
+                return null;
+            }
             JArray actions = new JArray();
             JObject actionsItem = null;
             if (listFields.ToString().StartsWith("[") && listFields.ToString().EndsWith("]")) //判断是否是Json 数组
@@ -110,6 +120,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #region 操作栏
         public JArray handleOperationConf(JArray listFields)
         {
+
+            if (listFields == null)
+            {
+                return null;
+            }
             JArray operations = new JArray();
             JObject operationsItem = null;
 
@@ -175,6 +190,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #region 新建
         public JArray handleCreateConf(JArray listFields, string filterType)
         {
+
+            if (listFields == null)
+            {
+                return null;
+            }
             JArray createFields = new JArray();
             JObject createFieldItem = null;
             if (listFields.ToString().StartsWith("[") && listFields.ToString().EndsWith("]")) //判断是否是Json 数组
@@ -285,7 +305,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #region 详情
         public JArray handleViewConf(JArray listFields)
         {
-
+            
+            if(listFields == null)
+            {
+                return null;
+            }
             JArray viewFields = new JArray();
             JObject viewFieldItem = new JObject();
             viewFieldItem.Add("title", "详情");
