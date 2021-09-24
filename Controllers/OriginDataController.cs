@@ -22,6 +22,7 @@ namespace PageConfig.WebApi.Controllers
         private string originUrl = "";
         private string createPageUrl = "";
         private string addFieldUrl = "";
+        private int pageId = 0;
 
 
         private readonly ILogger<OriginDataController> _logger;
@@ -67,7 +68,7 @@ namespace PageConfig.WebApi.Controllers
 
                 endpoint = jsonData["endpoint"].ToString();
                 originUrl = string.Format("{0}{1}", endpoint, jsonData["originApi"].ToString()); 
-                createPageUrl = string.Format("{0}{1}", endpoint, jsonData["createPageApi"].ToString()); 
+                createPageUrl = string.Format("{0}{1}", endpoint, jsonData["createPageApi"]["api"].ToString()); 
                 addFieldUrl = string.Format("{0}{1}", endpoint, jsonData["addFieldApi"].ToString());
 
                 string token = jsonData["token"] != null ? jsonData["token"].ToString(): "";
@@ -82,10 +83,7 @@ namespace PageConfig.WebApi.Controllers
                     {
                         JObject info = (JObject)resJO[resultinfo_key];
                         //创建页面
-                        JObject responseCreateJO = createPage(createPageUrl);
-
-                        int pageId = 0;
-
+                        JObject responseCreateJO = createPage(createPageUrl, (JObject)(jsonData["createPageApi"]["data"]), token);
                         var createPageStatus = responseCreateJO["code"] != null ? Convert.ToInt32(responseCreateJO["code"]) : 0;
                         if (createPageStatus == 200)
                         {
@@ -106,7 +104,7 @@ namespace PageConfig.WebApi.Controllers
                                 foreach (var actionItem in actionListJA)
                                 {
                                     //添加lowactions
-                                    JObject respLowActionsJO = addLowActions(requestApi, pageId, (JObject)actionItem);
+                                    JObject respLowActionsJO = addLowActions(requestApi, pageId, (JObject)actionItem, token);
                                     var lowActionsStatus = respLowActionsJO["code"] != null ? Convert.ToInt32(respLowActionsJO["code"]) : 0;
                                     if (status != 200)
                                     {
@@ -128,7 +126,7 @@ namespace PageConfig.WebApi.Controllers
                                 foreach (var actionItem in actionListJA)
                                 {
                                     //添加lowactions
-                                    JObject respLowActionsJO = addlowoperationss(requestApi, pageId, (JObject)actionItem);
+                                    JObject respLowActionsJO = addlowoperationss(requestApi, pageId, (JObject)actionItem, token);
                                     var lowActionsStatus = respLowActionsJO["code"] != null ? Convert.ToInt32(respLowActionsJO["code"]) : 0;
                                     if (status != 200)
                                     {
@@ -158,7 +156,7 @@ namespace PageConfig.WebApi.Controllers
                                 int pId = pageId;
                                 if (!fieldName.Equals("id"))
                                 {
-                                    int addStatus = addPageField(addFieldUrl, fieldName, pId);
+                                    int addStatus = addPageField(addFieldUrl, fieldName, pId, token);
                                     if (addStatus == 1)
                                     {
                                         errCount++;
@@ -177,7 +175,7 @@ namespace PageConfig.WebApi.Controllers
                             return tool.MsgFormat(ResponseCode.操作失败, "创建页面失败, 获取pageId异常", "Error");
                         }
 
-                        JObject pageDetailJO = getPageDetail(createPageUrl, pageId);
+                        JObject pageDetailJO = getPageDetail(createPageUrl, pageId, token);
                         //return tool.MsgFormatToJson(ResponseCode.成功, "创建成功", "Success");
                         string convertString =  toConfig(pageDetailJO);
 
@@ -233,18 +231,40 @@ namespace PageConfig.WebApi.Controllers
         /// 创建页面获取pageId
         /// </summary>
         /// 
-        static JObject createPage(string url)
+        static JObject createPage(string url, JObject pageData, string token)
         {
 
-            string testUrl = "http://192.168.3.204:9000/api/crud/lowMainPage/lowMainPages";
+            string testUrl = "http://192.168.3.239:3333/api/crud/lowMainPage/lowMainPages";
 
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
             using (var http = new HttpClient(handler))
             {
                 string requestUrl = testUrl;
-                string jsonString = "{\"apiEndpoint\":\"string\",\"columnAlign\":\"string\",\"contentItemContainerStyle\":\"string\",\"contentItems\":\"string\",\"contentLayout\":\"string\",\"formAddFields\":\"string\",\"formAddTitle\":\"string\",\"formDefaultContentLayout\":\"string\",\"formDefaultWidth\":0,\"formEditFields\":\"string\",\"formEditTitle\":\"string\",\"formViewFields\":\"string\",\"formViewTitle\":\"string\",\"listFields\":\"string\",\"listOperationFields\":\"string\",\"pageTitle\":\"string\"}";
-                HttpContent content = new StringContent(jsonString);
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+
+                JObject postJO = new JObject();
+                postJO.Add("apiEndpoint", pageData["apiEndpoint"]);
+                postJO.Add("columnAlign", pageData["columnAlign"] != null ? pageData["columnAlign"].ToString() : "");
+                postJO.Add("contentItemContainerStyle", pageData["contentItemContainerStyle"] != null ? pageData["contentItemContainerStyle"] : "");
+                postJO.Add("contentItems", pageData["contentItems"] != null ? pageData["contentItems"] : "");
+                postJO.Add("contentLayout", pageData["contentLayout"] != null ? pageData["contentLayout"] : "Grid");
+                postJO.Add("formAddFields", pageData["formAddFields"] != null ? pageData["formAddFields"] : "");
+                postJO.Add("formAddTitle", pageData["formAddTitle"] != null ? pageData["formAddTitle"].ToString() : "");
+                postJO.Add("formDefaultContentLayout", pageData["formDefaultContentLayout"] != null ? pageData["formDefaultContentLayout"] : "TitleContent");
+                postJO.Add("formDefaultWidth", pageData["formDefaultWidth"] != null ? int.Parse(pageData["formDefaultWidth"].ToString()):0);
+                postJO.Add("formEditFields", pageData["formEditFields"] != null ? pageData["formEditFields"] : "");
+                postJO.Add("formEditTitle", pageData["formEditTitle"] != null ? pageData["formEditTitle"] : "");
+                postJO.Add("formViewFields", pageData["formViewFields"] != null ? pageData["formViewFields"] : "");
+                postJO.Add("formViewTitle", pageData["formViewTitle"] != null ? pageData["formViewTitle"] : "");
+                postJO.Add("listFields", pageData["listFields"] != null ? pageData["listFields"] : "");
+                postJO.Add("listOperationFields", pageData["listOperationFields"] != null ? pageData["listOperationFields"] : "");
+                postJO.Add("pageTitle", pageData["pageTitle"] != null ? pageData["pageTitle"] : "");
+
+                HttpContent content = new StringContent(postJO.ToString());
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
                 var task = http.PostAsync(requestUrl, content);
                 var rep = task.Result;
@@ -261,16 +281,21 @@ namespace PageConfig.WebApi.Controllers
         /// 添加lowActionss
         /// </summary>
         /// 
-        static JObject addLowActions(string url, int pageId, JObject actionData)
+        static JObject addLowActions(string url, int pageId, JObject actionData, string token)
         {
 
-            string testUrl = "http://192.168.3.204:9000/api/crud/lowActions/lowActionses";
+            string testUrl = "http://192.168.3.239:3333/api/crud/lowActions/lowActionses";
 
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
             using (var http = new HttpClient(handler))
             {
                 string requestUrl = testUrl;
+
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
 
                 JObject postJO = new JObject();
                 postJO.Add("path", actionData["path"].ToString());
@@ -300,16 +325,21 @@ namespace PageConfig.WebApi.Controllers
         /// 添加lowOperationss 操作栏按钮
         /// </summary>
         /// 
-        static JObject addlowoperationss(string url, int pageId, JObject actionData)
+        static JObject addlowoperationss(string url, int pageId, JObject actionData, string token)
         {
 
-            string testUrl = "http://192.168.3.204:9000/api/crud/lowOperations/lowOperationses";
+            string testUrl = "http://192.168.3.239:3333/api/crud/lowOperations/lowOperationses";
 
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
             using (var http = new HttpClient(handler))
             {
                 string requestUrl = testUrl;
+
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
 
                 JObject postJO = new JObject();
                 postJO.Add("path", actionData["path"].ToString());
@@ -342,15 +372,20 @@ namespace PageConfig.WebApi.Controllers
         /// 添加页面字段
         /// </summary>
         /// 
-        static int addPageField(string url, string fieldName, int pageId)
+        static int addPageField(string url, string fieldName, int pageId, string token)
         {
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
-            string testUrl = "http://192.168.3.204:9000/api/crud/lowFields/lowFieldses";
+            string testUrl = "http://192.168.3.239:3333/api/crud/lowFields/lowFieldses";
 
             using (var http = new HttpClient(handler))
             {
                 string requestUrl = testUrl;
+
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
 
                 JObject postJO = new JObject();
                 postJO.Add("listColumnMultiKeys", ""); 
@@ -407,17 +442,20 @@ namespace PageConfig.WebApi.Controllers
         /// 根据pageId获取页面详情
         /// </summary>
         /// 
-        static JObject getPageDetail(string url, int pageId)
+        static JObject getPageDetail(string url, int pageId, string token)
         {
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
-            string testUrl = string.Format("http://192.168.3.204:9000/api/crud/lowMainPage/lowMainPages/{0}", pageId);
+            string testUrl = string.Format("http://192.168.3.239:3333/api/crud/lowMainPage/lowMainPages/{0}", pageId);
 
             using (var http = new HttpClient(handler))
             {
                 //string requestUrl = string.Format("{0}/{1}", url, pageId);
                 string requestUrl = testUrl;
-
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
                 var task = http.GetAsync(requestUrl);
                 var rep = task.Result;
                 var task2 = rep.Content.ReadAsStringAsync();
