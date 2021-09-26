@@ -9,7 +9,8 @@ POST /createpage
       - api: 必填
       - data: 必填
     - addFieldApi: 必填 -- 添加页面字段，这里根据 originApi 返回的信息进行处理
-    - lowActions:  可填 --添加按钮
+    - lowFilterss: 可填 -- 搜索栏
+    - lowActions:  可填 -- 添加按钮
     - lowOperations:  可填  --列表操作栏按钮
     - token: 可选 --如api需要权限访问即填上token
 
@@ -40,6 +41,19 @@ POST /createpage
         }
     },
     "addFieldApi": "/api/crud/lowFields/lowFieldses", 
+    "lowFilterss":{
+        "api": "/api/crud/lowFilters/lowFilterses",
+        "filters": [
+            {
+                "contentLayout": "Grid", 
+                "fieldName": "search", 
+                "defaultSearchHint": "请输入", 
+                "searchFields": "", 
+                "fieldTitle": "分类名称", 
+                "fieldType": "search"
+            }
+        ]
+    },
     "lowActions": { 
         "api": "/api/crud/lowActions/lowActionses",
         "actions": [
