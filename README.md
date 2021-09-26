@@ -4,21 +4,43 @@
 POST /createpage
 
     - endpoint: 必填
-    - originApi: 必填
-    - createPageApi: 必填
-    - addFieldApi: 必填
-    - lowActions:  可填
-    - lowOperations:  可填
-    - token: 可选
+    - originApi: 必填 -- 如返回详情格式api
+    - createPageApi: 必填 -- 创建页面
+      - api: 必填
+      - data: 必填
+    - addFieldApi: 必填 -- 添加页面字段，这里根据 originApi 返回的信息进行处理
+    - lowActions:  可填 --添加按钮
+    - lowOperations:  可填  --列表操作栏按钮
+    - token: 可选 --如api需要权限访问即填上token
 
 //提交数据格式
 
 {
     "endpoint": "https://api.xiaojiuban.smallsaas.cn",
     "originApi": "/api/crud/product/productCategoryies/17",
-    "createPageApi": "/api/crud/lowMainPage/lowMainPages",
-    "addFieldApi": "/api/crud/lowFields/lowFieldses",
-    "lowActions": {
+    "createPageApi": { 
+        "api": "/api/crud/lowMainPage/lowMainPages",  
+        "data": {
+            "apiEndpoint": "/api/crud/fieldModel/fieldModels",
+            "columnAlign": "",
+            "contentItemContainerStyle": "",
+            "contentItems": "",
+            "contentLayout": "Grid",
+            "formAddFields": "",
+            "formAddTitle": "新增字段模板",
+            "formDefaultContentLayout": "TitleContent",
+            "formDefaultWidth": 0,
+            "formEditFields": "",
+            "formEditTitle": "编辑字段模板",
+            "formViewFields": "",
+            "formViewTitle": "查看字段模板",
+            "listFields": "",
+            "listOperationFields": "",
+            "pageTitle": "字段模板"
+        }
+    },
+    "addFieldApi": "/api/crud/lowFields/lowFieldses", 
+    "lowActions": { 
         "api": "/api/crud/lowActions/lowActionses",
         "actions": [
             { "title": "添加", "path": "/fieldTemplate/fieldTemplate-add"}
