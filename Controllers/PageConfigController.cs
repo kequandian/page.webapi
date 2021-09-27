@@ -58,6 +58,7 @@ namespace PageConfig.WebApi.Controllers
                 pageNameJO.Add("table", jsonData["pageTitle"].ToString());
                 pageNameJO.Add("new", jsonData["formAddTitle"].ToString());
                 pageNameJO.Add("edit", jsonData["formEditTitle"].ToString());
+                pageNameJO.Add("name", jsonData["pageName"].ToString());
 
                 string apiEndpoint = jsonData["apiEndpoint"].ToString();
                 //访问api
