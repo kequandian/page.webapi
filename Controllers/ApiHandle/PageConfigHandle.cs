@@ -108,7 +108,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     #endregion
 
                     propsJO.Add("path", listItemJObect["path"]);
-                    actionsItem.Add("props", propsJO);
+                    actionsItem.Add("options", propsJO);
                     actions.Add(actionsItem);
                 }
                 return actions;
@@ -163,7 +163,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         }
                     }
 
-                    operationsItem.Add("props", propsJO);
+                    operationsItem.Add("options", propsJO);
                     operations.Add(operationsItem);
                 }
                 return operations;

@@ -92,6 +92,27 @@ namespace PageConfig.WebApi.Controllers
                                 pageId = int.Parse(responseCreateJO[resultinfo_key]["id"].ToString());
                             }
 
+                            //addLowFilterss
+                            if (jsonData.ContainsKey("lowFilterss"))
+                            {
+                                JObject lowFilterssJO = (JObject)jsonData["lowFilterss"];
+
+                                JArray lowFiltersJA = (JArray)lowFilterssJO["filters"];
+
+                                string requestApi = string.Format("{0}{1}", endpoint, lowFilterssJO["api"].ToString());
+
+                                foreach (var filtersItem in lowFiltersJA)
+                                {
+                                    JObject respLowFiltersJO = addLowFilterss(requestApi, pageId, (JObject)filtersItem, token);
+                                    var lowFiltersStatus = respLowFiltersJO["code"] != null ? Convert.ToInt32(respLowFiltersJO["code"]) : 0;
+                                    if (lowFiltersStatus != 200)
+                                    {
+                                        return tool.MsgFormatToJson(ResponseCode.操作失败, string.Format("新增搜索栏异常,  {0}", respLowFiltersJO.ToString()), "Error");
+                                    }
+                                }
+
+                            }
+
                             //添加 lowActions 按钮
                             if (jsonData.ContainsKey("lowActions"))
                             {
@@ -103,10 +124,9 @@ namespace PageConfig.WebApi.Controllers
 
                                 foreach (var actionItem in actionListJA)
                                 {
-                                    //添加lowactions
                                     JObject respLowActionsJO = addLowActions(requestApi, pageId, (JObject)actionItem, token);
                                     var lowActionsStatus = respLowActionsJO["code"] != null ? Convert.ToInt32(respLowActionsJO["code"]) : 0;
-                                    if (status != 200)
+                                    if (lowActionsStatus != 200)
                                     {
                                         return tool.MsgFormatToJson(ResponseCode.操作失败, string.Format("新增lowActions异常,  {0}", respLowActionsJO.ToString()), "Error");
                                     }
@@ -117,20 +137,19 @@ namespace PageConfig.WebApi.Controllers
                             //添加 lowOperationses 操作栏 按钮
                             if (jsonData.ContainsKey("lowOperations"))
                             {
-                                JObject lowActionsJO = (JObject)jsonData["lowOperations"];
+                                JObject lowOperationsesJO = (JObject)jsonData["lowOperations"];
 
-                                JArray actionListJA = (JArray)lowActionsJO["actions"];
+                                JArray OperationseListJA = (JArray)lowOperationsesJO["actions"];
 
-                                string requestApi = string.Format("{0}{1}", endpoint, lowActionsJO["api"].ToString());
+                                string requestApi = string.Format("{0}{1}", endpoint, lowOperationsesJO["api"].ToString());
 
-                                foreach (var actionItem in actionListJA)
+                                foreach (var operationseItem in OperationseListJA)
                                 {
-                                    //添加lowactions
-                                    JObject respLowActionsJO = addlowoperationss(requestApi, pageId, (JObject)actionItem, token);
-                                    var lowActionsStatus = respLowActionsJO["code"] != null ? Convert.ToInt32(respLowActionsJO["code"]) : 0;
-                                    if (status != 200)
+                                    JObject respLowOperationseJO = addlowoperationss(requestApi, pageId, (JObject)operationseItem, token);
+                                    var lowOperationseStatus = respLowOperationseJO["code"] != null ? Convert.ToInt32(respLowOperationseJO["code"]) : 0;
+                                    if (lowOperationseStatus != 200)
                                     {
-                                        return tool.MsgFormatToJson(ResponseCode.操作失败, string.Format("新增lowOperationses异常,  {0}", respLowActionsJO.ToString()), "Error");
+                                        return tool.MsgFormatToJson(ResponseCode.操作失败, string.Format("新增lowOperationses异常,  {0}", respLowOperationseJO.ToString()), "Error");
                                     }
                                 }
 
@@ -263,6 +282,49 @@ namespace PageConfig.WebApi.Controllers
                 postJO.Add("listFields", pageData["listFields"] != null ? pageData["listFields"] : "");
                 postJO.Add("listOperationFields", pageData["listOperationFields"] != null ? pageData["listOperationFields"] : "");
                 postJO.Add("pageTitle", pageData["pageTitle"] != null ? pageData["pageTitle"] : "");
+
+                HttpContent content = new StringContent(postJO.ToString());
+                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                var task = http.PostAsync(requestUrl, content);
+                var rep = task.Result;
+                var task2 = rep.Content.ReadAsStringAsync();
+
+                JObject respJO = (JObject)JsonConvert.DeserializeObject(task2.Result);
+
+                return respJO;
+
+            }
+        }
+
+
+        /// <summary>
+        /// 添加 搜索栏
+        /// </summary>
+        /// 
+        static JObject addLowFilterss(string url, int pageId, JObject filtersData, string token)
+        {
+
+            string testUrl = "http://192.168.3.239:3333/api/crud/lowFilters/lowFilterses";
+
+            var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
+
+            using (var http = new HttpClient(handler))
+            {
+                string requestUrl = testUrl;
+
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+
+                JObject postJO = new JObject();
+                postJO.Add("contentLayout", filtersData["contentLayout"] != null ? filtersData["contentLayout"].ToString() : "Grid");
+                postJO.Add("fieldName", filtersData["fieldName"] != null ? filtersData["fieldName"].ToString() : "search");
+                postJO.Add("defaultSearchHint", filtersData["defaultSearchHint"] != null ? filtersData["defaultSearchHint"].ToString() : "请输入");
+                postJO.Add("searchFields", filtersData["searchFields"] != null ? filtersData["searchFields"].ToString() : "");
+                postJO.Add("pageId", pageId);
+                postJO.Add("fieldTitle", filtersData["fieldTitle"] != null ? filtersData["fieldTitle"].ToString() : "搜索");
+                postJO.Add("fieldType", filtersData["fieldType"] != null ? filtersData["fieldType"].ToString() : "search");
 
                 HttpContent content = new StringContent(postJO.ToString());
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
