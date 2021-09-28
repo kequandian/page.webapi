@@ -79,7 +79,7 @@ namespace PageConfig.WebApi.Controllers
                 //actions
                 tableActionsJO = handle.handleActionsConf((JArray)jsonData["lowActionss"]);
                 //操作栏
-                tableOperationJO = handle.handleOperationConf((JArray)jsonData["lowOperationss"]);
+                tableOperationJO = handle.handleOperationConf((JArray)jsonData["lowOperationss"], (JArray)jsonData["lowFieldss"]);
                 //新增
                 createFieldsJO = handle.handleCreateConf((JArray)jsonData["lowFieldss"], "add");
                 //编辑

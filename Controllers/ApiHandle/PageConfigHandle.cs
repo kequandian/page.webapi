@@ -118,7 +118,13 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #endregion
 
         #region 操作栏
-        public JArray handleOperationConf(JArray listFields)
+        /// <summary>
+        /// 操作栏
+        /// </summary>
+        /// <param name="listFields"></param>
+        /// <param name="fields">config => fields数据</param>
+        /// <returns></returns>
+        public JArray handleOperationConf(JArray listFields, JArray fields)
         {
 
             if (listFields == null)
@@ -134,31 +140,68 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 {
                     operationsItem = new JObject();
                     JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
+                    string type = listItemJObect["type"].ToString();
                     operationsItem.Add("title", listItemJObect["title"]);
-                    operationsItem.Add("type", listItemJObect["type"]);
-                    JObject propsJO = new JObject();
+                    operationsItem.Add("type", type);
 
+                    JObject propsJO = new JObject();
                     if (outsideStatus(int.Parse(listItemJObect["outside"].ToString())))
                     {
                         propsJO.Add("outside", true);
                     }
-                    string type = listItemJObect["type"].ToString();
-                    if (type.Equals("path"))
+
+                    //模态框
+                    if (type.Equals("modal"))
+                    {
+                        propsJO.Add("modalTitle", listItemJObect["modalTitle"]);
+                        propsJO.Add("modalWidth", listItemJObect["modalWidth"] != null ? int.Parse(listItemJObect["modalWidth"].ToString()) : "600");
+                        propsJO.Add("layout", listItemJObect["modalLayout"]);
+
+                        JArray itemsJA = new JArray();
+                        JObject itemJO = new JObject();
+
+                        JObject originItemJO = (JObject)(listItemJObect["items"][0]);
+
+
+                        itemJO.Add("layout", originItemJO["modalItemsLayout"]);
+                        itemJO.Add("component", originItemJO["modalItemsComp"]);
+
+
+                        JObject itemConfigJO = new JObject();
+                        itemConfigJO.Add("layout", originItemJO["modalContentLayout"]);
+
+                        JObject itemConfigApiJO = new JObject();
+                        itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
+                        itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
+
+                        itemConfigJO.Add("API", itemConfigApiJO);
+
+                        itemConfigJO.Add("fields", handleFieldsConf(fields));
+
+                        itemJO.Add("config", itemConfigJO);
+
+
+                        itemsJA.Add(itemJO);
+                        propsJO.Add("items", itemsJA);
+
+                    }
+                    //路由跳转
+                    else if (type.Equals("path"))
                     {
                         propsJO.Add("path", listItemJObect["path"]);
                     }
-
-                    if (type.Equals("request"))
+                    //网络访问
+                    else if (type.Equals("request"))
                     {
-                        propsJO.Add("API", listItemJObect["requestApi"]);
+                        propsJO.Add("API", listItemJObect["requestRefreshApi"]);
                         propsJO.Add("method", listItemJObect["requestMethod"]);
                     }
-
-                    if (type.Equals("delete"))
+                    //删除
+                    else if (type.Equals("delete"))
                     {
-                        if (!listItemJObect["requestApi"].ToString().Equals(""))
+                        if (!listItemJObect["requestRefreshApi"].ToString().Equals(""))
                         {
-                            propsJO.Add("API", listItemJObect["requestApi"]);
+                            propsJO.Add("API", listItemJObect["requestRefreshApi"]);
                             propsJO.Add("method", listItemJObect["requestMethod"]);
                         }
                     }
