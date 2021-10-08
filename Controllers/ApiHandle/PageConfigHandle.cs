@@ -33,9 +33,21 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         {
                             tableFieldItem.Add("valueType", listItemJObect["listColumnType"]);
                             JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJObect["listColumnOptions"].ToString());
-                            tableFieldItem.Add("options", optionsJO["options"]);
-                            tableFieldItem.Add("theme", optionsJO["theme"]);
-                            tableFieldItem.Add("type", optionsJO["type"]);
+                            if(optionsJO != null)
+                            {
+                                if (optionsJO.ContainsKey("options"))
+                                {
+                                    tableFieldItem.Add("options", optionsJO["options"]);
+                                }
+                                if (optionsJO.ContainsKey("theme"))
+                                {
+                                    tableFieldItem.Add("theme", optionsJO["theme"]);
+                                }
+                                if (optionsJO.ContainsKey("type"))
+                                {
+                                    tableFieldItem.Add("type", optionsJO["type"]);
+                                }
+                            }
                         }
                         tableFields.Add(tableFieldItem);
                     }
