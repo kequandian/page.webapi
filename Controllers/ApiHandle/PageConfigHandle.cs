@@ -40,47 +40,23 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                                     tableFieldItem.Add("options", optionsJO["options"]);
 
                                     
-                                    JObject optionJO = (JObject)tableFieldItem["options"];
-                                    if (listItemJO.ContainsKey("listFontSize") && int.Parse(listItemJO["listFontSize"].ToString()) > 0)
-                                    {
-                                        optionJO.Add("font-size", listItemJO["listFontSize"]);
-                                    }
+                                    //JObject optionJO = (JObject)tableFieldItem["options"];
+                                    //if (listItemJO.ContainsKey("listFontSize") && int.Parse(listItemJO["listFontSize"].ToString()) > 0)
+                                    //{
+                                    //    optionJO.Add("font-size", listItemJO["listFontSize"]);
+                                    //}
 
-                                    if (listItemJO.ContainsKey("listFontWeight") && int.Parse(listItemJO["listFontWeight"].ToString()) > 0)
-                                    {
-                                        optionJO.Add("font-weight", listItemJO["listFontWeight"]);
-                                    }
+                                    //if (listItemJO.ContainsKey("listFontWeight") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                                    //{
+                                    //    optionJO.Add("font-weight", listItemJO["listFontWeight"]);
+                                    //}
 
-                                    if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
-                                    {
-                                        optionJO.Add("font-color", listItemJO["listFontColor"]);
-                                    }
+                                    //if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                                    //{
+                                    //    optionJO.Add("font-color", listItemJO["listFontColor"]);
+                                    //}
 
-                                    tableFieldItem.Add("options", optionJO);
-                                }
-                                else
-                                {
-
-                                    JObject otherOption = new JObject();
-                                    if (listItemJO.ContainsKey("listFontSize") && int.Parse(listItemJO["listFontSize"].ToString()) > 0)
-                                    {
-                                        otherOption.Add("font-size", listItemJO["listFontSize"]);
-                                    }
-
-                                    if (listItemJO.ContainsKey("listFontWeight") && int.Parse(listItemJO["listFontWeight"].ToString()) > 0)
-                                    {
-                                        otherOption.Add("font-weight", listItemJO["listFontWeight"]);
-                                    }
-
-                                    if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
-                                    {
-                                        otherOption.Add("font-color", listItemJO["listFontColor"]);
-                                    }
-
-                                    if (otherOption.ContainsKey("font-size") || otherOption.ContainsKey("font-weight") || otherOption.ContainsKey("font-color"))
-                                    {
-                                        tableFieldItem.Add("options", otherOption);
-                                    }
+                                    //tableFieldItem["options"] = optionJO;
                                 }
 
                                 if (optionsJO.ContainsKey("theme"))
@@ -92,6 +68,33 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                                     tableFieldItem.Add("type", optionsJO["type"]);
                                 }
                             }
+                            
+                        }
+                        else
+                        {
+
+                            JObject otherOption = new JObject();
+                            JObject styles = new JObject();
+                            if (listItemJO.ContainsKey("listFontSize") && int.Parse(listItemJO["listFontSize"].ToString()) > 0)
+                            {
+                                styles.Add("font-size", listItemJO["listFontSize"]);
+                            }
+
+                            if (listItemJO.ContainsKey("listFontWeight") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                            {
+                                styles.Add("font-weight", listItemJO["listFontWeight"]);
+                            }
+
+                            if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                            {
+                                styles.Add("color", listItemJO["listFontColor"]);
+                            }
+
+                            if (styles.ContainsKey("font-size") || styles.ContainsKey("font-weight") || styles.ContainsKey("font-color"))
+                            {
+                                otherOption.Add("style", styles);
+                                tableFieldItem.Add("options", otherOption);
+                            }
                         }
 
                         //内容摆放位置属性
@@ -101,19 +104,10 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         }
 
                         //列宽 
-                        if (!listItemJO["listColumnWidth"].ToString().Equals(""))
+                        if (listItemJO.ContainsKey("listColumnWidth") && int.Parse(listItemJO["listColumnWidth"].ToString()) > 0)
                         {
                             tableFieldItem.Add("width", listItemJO["listColumnWidth"]);
                         }
-
-                        //列宽 
-                        if (!listItemJO["listColumnWidth"].ToString().Equals(""))
-                        {
-                            tableFieldItem.Add("width", listItemJO["listColumnWidth"]);
-                        }
-
-
-
 
                         tableFields.Add(tableFieldItem);
                     }
@@ -172,7 +166,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     JObject listItemJO = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
                     string actionType = listItemJO["type"].ToString();
                     actionsItem.Add("title", listItemJO["title"]);
-                    actionsItem.Add("type", listItemJO["actionType"]);
+                    actionsItem.Add("type", actionType);
                     JObject propsJO = new JObject();
 
                     #region options非必须属性
@@ -185,8 +179,23 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         }
                     }
                     #endregion
+                    if (actionType.Equals("request"))
+                    {
+                        propsJO.Add("API", listItemJO["requestRefreshApi"]);
+                        propsJO.Add("method", listItemJO["requestMethod"]);
+                    }
+                    else if (actionType.Equals("import"))
+                    {
 
-                    propsJO.Add("path", listItemJO["path"]);
+                    }
+                    else if (actionType.Equals("export"))
+                    {
+
+                    }
+                    else
+                    {
+                        propsJO.Add("path", listItemJO["path"]);
+                    }
                     actionsItem.Add("options", propsJO);
                     actions.Add(actionsItem);
                 }
@@ -218,13 +227,13 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 foreach (var listItem in listFields)
                 {
                     operationsItem = new JObject();
-                    JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
-                    string type = listItemJObect["type"].ToString();
-                    operationsItem.Add("title", listItemJObect["title"]);
+                    JObject listItemJO = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
+                    string type = listItemJO["type"].ToString();
+                    operationsItem.Add("title", listItemJO["title"]);
                     operationsItem.Add("type", type);
 
                     JObject propsJO = new JObject();
-                    if (outsideStatus(int.Parse(listItemJObect["outside"].ToString())))
+                    if (outsideStatus(int.Parse(listItemJO["outside"].ToString())))
                     {
                         propsJO.Add("outside", true);
                     }
@@ -232,14 +241,14 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     //模态框
                     if (type.Equals("modal"))
                     {
-                        propsJO.Add("modalTitle", listItemJObect["modalTitle"]);
-                        propsJO.Add("modalWidth", listItemJObect["modalWidth"] != null ? int.Parse(listItemJObect["modalWidth"].ToString()) : "600");
-                        propsJO.Add("layout", listItemJObect["modalLayout"]);
+                        propsJO.Add("modalTitle", listItemJO["modalTitle"]);
+                        propsJO.Add("modalWidth", listItemJO["modalWidth"] != null ? int.Parse(listItemJO["modalWidth"].ToString()) : "600");
+                        propsJO.Add("layout", listItemJO["modalLayout"]);
 
                         JArray itemsJA = new JArray();
                         JObject itemJO = new JObject();
 
-                        JObject originItemJO = (JObject)(listItemJObect["items"][0]);
+                        JObject originItemJO = (JObject)(listItemJO["items"][0]);
 
 
                         itemJO.Add("layout", originItemJO["modalItemsLayout"]);
@@ -267,25 +276,35 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     //路由跳转
                     else if (type.Equals("path"))
                     {
-                        propsJO.Add("path", listItemJObect["path"]);
+                        propsJO.Add("path", listItemJO["path"]);
                     }
                     //网络访问
                     else if (type.Equals("request"))
                     {
-                        propsJO.Add("API", listItemJObect["requestRefreshApi"]);
-                        propsJO.Add("method", listItemJObect["requestMethod"]);
+                        propsJO.Add("API", listItemJO["requestRefreshApi"]);
+                        propsJO.Add("method", listItemJO["requestMethod"]);
                     }
                     //删除
                     else if (type.Equals("delete"))
                     {
-                        if (!listItemJObect["requestRefreshApi"].ToString().Equals(""))
+                        if (!listItemJO["requestRefreshApi"].ToString().Equals(""))
                         {
-                            propsJO.Add("API", listItemJObect["requestRefreshApi"]);
-                            propsJO.Add("method", listItemJObect["requestMethod"]);
+                            propsJO.Add("API", listItemJO["requestRefreshApi"]);
+                            propsJO.Add("method", listItemJO["requestMethod"]);
                         }
                     }
 
                     operationsItem.Add("options", propsJO);
+
+                    //显示/隐藏属性
+                    if (!listItemJO["expectField"].ToString().Equals("") && !listItemJO["expectValue"].ToString().Equals(""))
+                    {
+                        JObject expectJO = new JObject();
+                        expectJO.Add("field", listItemJO["expectField"]);
+                        expectJO.Add("value", listItemJO["expectValue"]);
+                        operationsItem.Add("expect", expectJO);
+                    }
+
                     operations.Add(operationsItem);
                 }
                 return operations;
