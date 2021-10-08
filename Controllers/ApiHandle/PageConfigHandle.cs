@@ -353,6 +353,10 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         {
                             JObject rulesItemJO = new JObject();
                             rulesItemJO.Add("type", "required");
+                            if(listItemJO.ContainsKey("formFieldTips") && !listItemJO["formFieldTips"].ToString().Equals(""))
+                            {
+                                rulesItemJO.Add("message", listItemJO["formFieldTips"]);
+                            }
                             rulesJA.Add(rulesItemJO);
                             createFieldItem.Add("rules", rulesJA);
                         }
