@@ -24,21 +24,65 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 foreach (var listItem in listFields)
                 {
                     tableFieldItem = new JObject();
-                    JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
-                    if (listItemJObect["fieldScopes"].ToString().Contains("table"))
+                    JObject listItemJO = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
+                    if (listItemJO["fieldScopes"].ToString().Contains("table"))
                     {
-                        tableFieldItem.Add("field", listItemJObect["fieldBinding"]);
-                        tableFieldItem.Add("label", listItemJObect["fieldLabel"]);
-                        if (!listItemJObect["listColumnType"].ToString().Equals("plain"))
+                        tableFieldItem.Add("field", listItemJO["fieldBinding"]);
+                        tableFieldItem.Add("label", listItemJO["fieldLabel"]);
+                        if (!listItemJO["listColumnType"].ToString().Equals("plain"))
                         {
-                            tableFieldItem.Add("valueType", listItemJObect["listColumnType"]);
-                            JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJObect["listColumnOptions"].ToString());
+                            tableFieldItem.Add("valueType", listItemJO["listColumnType"]);
+                            JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJO["listColumnOptions"].ToString());
                             if(optionsJO != null)
                             {
                                 if (optionsJO.ContainsKey("options"))
                                 {
                                     tableFieldItem.Add("options", optionsJO["options"]);
+
+                                    
+                                    JObject optionJO = (JObject)tableFieldItem["options"];
+                                    if (listItemJO.ContainsKey("listFontSize") && int.Parse(listItemJO["listFontSize"].ToString()) > 0)
+                                    {
+                                        optionJO.Add("font-size", listItemJO["listFontSize"]);
+                                    }
+
+                                    if (listItemJO.ContainsKey("listFontWeight") && int.Parse(listItemJO["listFontWeight"].ToString()) > 0)
+                                    {
+                                        optionJO.Add("font-weight", listItemJO["listFontWeight"]);
+                                    }
+
+                                    if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                                    {
+                                        optionJO.Add("font-color", listItemJO["listFontColor"]);
+                                    }
+
+                                    tableFieldItem.Add("options", optionJO);
                                 }
+                                else
+                                {
+
+                                    JObject otherOption = new JObject();
+                                    if (listItemJO.ContainsKey("listFontSize") && int.Parse(listItemJO["listFontSize"].ToString()) > 0)
+                                    {
+                                        otherOption.Add("font-size", listItemJO["listFontSize"]);
+                                    }
+
+                                    if (listItemJO.ContainsKey("listFontWeight") && int.Parse(listItemJO["listFontWeight"].ToString()) > 0)
+                                    {
+                                        otherOption.Add("font-weight", listItemJO["listFontWeight"]);
+                                    }
+
+                                    if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                                    {
+                                        otherOption.Add("font-color", listItemJO["listFontColor"]);
+                                    }
+
+                                    if (otherOption.ContainsKey("font-size") || otherOption.ContainsKey("font-weight") || otherOption.ContainsKey("font-color"))
+                                    {
+                                        tableFieldItem.Add("options", otherOption);
+                                    }
+                                }
+
                                 if (optionsJO.ContainsKey("theme"))
                                 {
                                     tableFieldItem.Add("theme", optionsJO["theme"]);
@@ -49,6 +93,28 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                                 }
                             }
                         }
+
+                        //内容摆放位置属性
+                        if (!listItemJO["listColumnAlign"].ToString().Equals(""))
+                        {
+                            tableFieldItem.Add("align", listItemJO["listColumnAlign"]);
+                        }
+
+                        //列宽 
+                        if (!listItemJO["listColumnWidth"].ToString().Equals(""))
+                        {
+                            tableFieldItem.Add("width", listItemJO["listColumnWidth"]);
+                        }
+
+                        //列宽 
+                        if (!listItemJO["listColumnWidth"].ToString().Equals(""))
+                        {
+                            tableFieldItem.Add("width", listItemJO["listColumnWidth"]);
+                        }
+
+
+
+
                         tableFields.Add(tableFieldItem);
                     }
                 }
@@ -103,15 +169,16 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 foreach (var listItem in listFields)
                 {
                     actionsItem = new JObject();
-                    JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
-                    actionsItem.Add("title", listItemJObect["title"]);
-                    actionsItem.Add("type", listItemJObect["type"]);
+                    JObject listItemJO = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
+                    string actionType = listItemJO["type"].ToString();
+                    actionsItem.Add("title", listItemJO["title"]);
+                    actionsItem.Add("type", listItemJO["actionType"]);
                     JObject propsJO = new JObject();
 
                     #region options非必须属性
-                    if (listItemJObect["requestOptions"].ToString().StartsWith("{") && listItemJObect["requestOptions"].ToString().EndsWith("}"))
+                    if (listItemJO["requestOptions"].ToString().StartsWith("{") && listItemJO["requestOptions"].ToString().EndsWith("}"))
                     {
-                        JObject requestOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJObect["requestOptions"].ToString());
+                        JObject requestOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["requestOptions"].ToString());
                         foreach (var rqItem in requestOptionsJObect)
                         {
                             propsJO.Add(rqItem.Key.ToString(), rqItem.Value);
@@ -119,7 +186,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     }
                     #endregion
 
-                    propsJO.Add("path", listItemJObect["path"]);
+                    propsJO.Add("path", listItemJO["path"]);
                     actionsItem.Add("options", propsJO);
                     actions.Add(actionsItem);
                 }
@@ -257,13 +324,13 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 foreach (var listItem in listFields)
                 {
                     createFieldItem = new JObject();
-                    JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
-                    if (listItemJObect["fieldScopes"].ToString().Contains(filterType))
+                    JObject listItemJO = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
+                    if (listItemJO["fieldScopes"].ToString().Contains(filterType))
                     {
-                        createFieldItem.Add("field", listItemJObect["fieldBinding"]);
-                        createFieldItem.Add("label", listItemJObect["fieldLabel"]);
+                        createFieldItem.Add("field", listItemJO["fieldBinding"]);
+                        createFieldItem.Add("label", listItemJO["fieldLabel"]);
                         JArray rulesJA = new JArray();
-                        if (int.Parse(listItemJObect["formInputRequired"].ToString()) == 1)
+                        if (int.Parse(listItemJO["formInputRequired"].ToString()) == 1)
                         {
                             JObject rulesItemJO = new JObject();
                             rulesItemJO.Add("type", "required");
@@ -271,25 +338,30 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                             createFieldItem.Add("rules", rulesJA);
                         }
                         JObject propsJO = new JObject();
-                        if (!listItemJObect["formFieldHint"].ToString().Equals(""))
+                        if (!listItemJO["formFieldHint"].ToString().Equals(""))
                         {
-                            propsJO.Add("placeholder", listItemJObect["formFieldHint"].ToString());
+                            propsJO.Add("placeholder", listItemJO["formFieldHint"].ToString());
                             createFieldItem.Add("props", propsJO);
                         }
-                        createFieldItem.Add("type", listItemJObect["formInputType"]);
+                        createFieldItem.Add("type", listItemJO["formInputType"]);
 
-                        if (listItemJObect["formInputOptions"].ToString().StartsWith("{") && listItemJObect["formInputOptions"].ToString().EndsWith("}"))
+                        if (!(listItemJO["formFieldQuestion"].ToString().Equals("")))
                         {
-                            JObject formInputOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJObect["formInputOptions"].ToString());
+                            createFieldItem.Add("toptips", listItemJO["formFieldQuestion"]);
+                        }
+
+                        if (listItemJO["formInputOptions"].ToString().StartsWith("{") && listItemJO["formInputOptions"].ToString().EndsWith("}"))
+                        {
+                            JObject formInputOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["formInputOptions"].ToString());
                             foreach (var fioItem in formInputOptionsJObect)
                             {
                                 createFieldItem.Add(fioItem.Key.ToString(), fioItem.Value);
                             }
                         }
 
-                        if (listItemJObect["fieldValueOptions"].ToString().StartsWith("{") && listItemJObect["fieldValueOptions"].ToString().EndsWith("}"))
+                        if (listItemJO["fieldValueOptions"].ToString().StartsWith("{") && listItemJO["fieldValueOptions"].ToString().EndsWith("}"))
                         {
-                            JObject fieldValueOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJObect["fieldValueOptions"].ToString());
+                            JObject fieldValueOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["fieldValueOptions"].ToString());
                             createFieldItem.Add("options", fieldValueOptionsJObect["options"]);
                         }
 
