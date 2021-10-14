@@ -589,7 +589,7 @@ namespace PageConfig.WebApi.Controllers
                 //搜索
                 searchFieldsJO = handle.handleSearchConf((JArray)jsonData["lowFilterss"]);
                 //actions
-                tableActionsJO = handle.handleActionsConf((JArray)jsonData["lowActionss"]);
+                tableActionsJO = handle.handleActionsConf((JArray)jsonData["lowActionss"], (JArray)jsonData["lowFieldss"]);
                 //操作栏
                 tableOperationJO = handle.handleOperationConf((JArray)jsonData["lowOperationss"], (JArray)jsonData["lowFieldss"]);
                 //新增

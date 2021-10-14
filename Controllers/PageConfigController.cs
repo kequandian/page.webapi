@@ -61,6 +61,13 @@ namespace PageConfig.WebApi.Controllers
                 pageNameJO.Add("name", jsonData["pageName"].ToString());
 
                 string apiEndpoint = jsonData["apiEndpoint"].ToString();
+
+                //页面宽度
+                if(jsonData.ContainsKey("pageMinWidth") && int.Parse(jsonData["pageMinWidth"].ToString()) > 0)
+                {
+                    bodyContent.Add("minWidth", jsonData["pageMinWidth"]);
+                }
+
                 //访问api
                 bodyContent.Add("listAPI", apiEndpoint);
                 bodyContent.Add("createAPI", apiEndpoint);
@@ -77,7 +84,7 @@ namespace PageConfig.WebApi.Controllers
                 //搜索
                 searchFieldsJO = handle.handleSearchConf((JArray)jsonData["lowFilterss"]);
                 //actions
-                tableActionsJO = handle.handleActionsConf((JArray)jsonData["lowActionss"]);
+                tableActionsJO = handle.handleActionsConf((JArray)jsonData["lowActionss"], (JArray)jsonData["lowFieldss"]);
                 //操作栏
                 tableOperationJO = handle.handleOperationConf((JArray)jsonData["lowOperationss"], (JArray)jsonData["lowFieldss"]);
                 //新增
@@ -102,7 +109,7 @@ namespace PageConfig.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                return tool.MsgFormat(ResponseCode.操作失败, "获取信息失败", ex.ToString());
+                return tool.MsgFormat(ResponseCode.操作失败, "格式转换失败", ex.ToString());
             }
 
         }

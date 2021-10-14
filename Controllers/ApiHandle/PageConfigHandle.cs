@@ -149,7 +149,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         #endregion
 
         #region actions
-        public JArray handleActionsConf(JArray listFields)
+        public JArray handleActionsConf(JArray listFields, JArray fields)
         {
 
             if (listFields == null)
@@ -172,8 +172,8 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     #region options非必须属性
                     if (listItemJO["requestOptions"].ToString().StartsWith("{") && listItemJO["requestOptions"].ToString().EndsWith("}"))
                     {
-                        JObject requestOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["requestOptions"].ToString());
-                        foreach (var rqItem in requestOptionsJObect)
+                        JObject requestOptionsJO = (JObject)JsonConvert.DeserializeObject(listItemJO["requestOptions"].ToString());
+                        foreach (var rqItem in requestOptionsJO)
                         {
                             propsJO.Add(rqItem.Key.ToString(), rqItem.Value);
                         }
@@ -183,6 +183,8 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     {
                         propsJO.Add("API", listItemJO["requestRefreshApi"]);
                         propsJO.Add("method", listItemJO["requestMethod"]);
+                        JObject dataJO = (JObject)JsonConvert.DeserializeObject(listItemJO["requestBody"].ToString());
+                        propsJO.Add("data", dataJO);
                     }
                     else if (actionType.Equals("import"))
                     {
@@ -190,6 +192,47 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     }
                     else if (actionType.Equals("export"))
                     {
+
+                    }
+                    else if (actionType.Equals("modal")) //模态框
+                    {
+                        propsJO.Add("modalTitle", listItemJO["modalTitle"]);
+                        propsJO.Add("modalWidth", listItemJO["modalWidth"] != null ? int.Parse(listItemJO["modalWidth"].ToString()) : "600");
+                        propsJO.Add("layout", listItemJO["modalLayout"]);
+
+                        JArray itemsJA = new JArray();
+                        JObject itemJO = new JObject();
+
+                        JObject originItemJO = new JObject();
+                        JArray itemList = (JArray)listItemJO["items"];
+                        if (itemList.Count > 0)
+                        {
+                            originItemJO = (JObject)itemList[0];
+                            itemJO.Add("layout", originItemJO["modalItemsLayout"]);
+                            itemJO.Add("component", originItemJO["modalItemsComp"]);
+
+
+                            JObject itemConfigJO = new JObject();
+                            itemConfigJO.Add("layout", originItemJO["modalContentLayout"]);
+
+                            JObject itemConfigApiJO = new JObject();
+                            if (!originItemJO["modalContentUpdateApi"].ToString().Equals(""))
+                            {
+                                itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
+                                itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
+                            }
+                            else if(!originItemJO["modalContentCreateApi"].ToString().Equals(""))
+                            {
+                                itemConfigApiJO.Add("createAPI", originItemJO["modalContentCreateApi"]);
+                            }
+                            itemConfigJO.Add("API", itemConfigApiJO);
+
+                            itemConfigJO.Add("fields", handleCreateConf(fields, "add"));
+                            itemJO.Add("config", itemConfigJO);
+                            itemsJA.Add(itemJO);
+                        }
+
+                        propsJO.Add("items", itemsJA);
 
                     }
                     else
@@ -259,12 +302,19 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         itemConfigJO.Add("layout", originItemJO["modalContentLayout"]);
 
                         JObject itemConfigApiJO = new JObject();
-                        itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
-                        itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
+                        if (!originItemJO["modalContentUpdateApi"].ToString().Equals(""))
+                        {
+                            itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
+                            itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
+                        }
+                        else if (!originItemJO["modalContentCreateApi"].ToString().Equals(""))
+                        {
+                            itemConfigApiJO.Add("createAPI", originItemJO["modalContentCreateApi"]);
+                        }
 
                         itemConfigJO.Add("API", itemConfigApiJO);
 
-                        itemConfigJO.Add("fields", handleFieldsConf(fields));
+                        itemConfigJO.Add("fields", handleCreateConf(fields, "add"));
 
                         itemJO.Add("config", itemConfigJO);
 
@@ -283,6 +333,8 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     {
                         propsJO.Add("API", listItemJO["requestRefreshApi"]);
                         propsJO.Add("method", listItemJO["requestMethod"]);
+                        JObject dataJO = (JObject)JsonConvert.DeserializeObject(listItemJO["requestBody"].ToString());
+                        propsJO.Add("data", dataJO);
                     }
                     //删除
                     else if (type.Equals("delete"))
@@ -297,7 +349,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     operationsItem.Add("options", propsJO);
 
                     //显示/隐藏属性
-                    if (!listItemJO["expectField"].ToString().Equals("") && !listItemJO["expectValue"].ToString().Equals(""))
+                    if (listItemJO["expectField"] != null && listItemJO["expectValue"] != null && !listItemJO["expectField"].ToString().Equals("") && !listItemJO["expectValue"].ToString().Equals(""))
                     {
                         JObject expectJO = new JObject();
                         expectJO.Add("field", listItemJO["expectField"]);
