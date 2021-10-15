@@ -75,6 +75,9 @@ namespace PageConfig.WebApi.Controllers
                 bodyContent.Add("updateAPI", string.Format("{0}/[id]", apiEndpoint));
                 bodyContent.Add("deleteAPI", string.Format("{0}/(id)", apiEndpoint));
 
+                bodyContent.Add("searchType", jsonData["searchType"]);
+                bodyContent.Add("searchButtonType", jsonData["searchButtonType"]);
+
                 //layout
                 layoutJO.Add("table", jsonData["contentLayout"].ToString());
                 layoutJO.Add("form", jsonData["formDefaultContentLayout"].ToString());

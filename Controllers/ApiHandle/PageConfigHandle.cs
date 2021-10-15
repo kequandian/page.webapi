@@ -216,12 +216,12 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                             itemConfigJO.Add("layout", originItemJO["modalContentLayout"]);
 
                             JObject itemConfigApiJO = new JObject();
-                            if (!originItemJO["modalContentUpdateApi"].ToString().Equals(""))
+                            if ( originItemJO["modalContentUpdateApi"] != null &&!originItemJO["modalContentUpdateApi"].ToString().Equals(""))
                             {
                                 itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
                                 itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
                             }
-                            else if(!originItemJO["modalContentCreateApi"].ToString().Equals(""))
+                            else if( originItemJO["modalContentCreateApi"] != null &&!originItemJO["modalContentCreateApi"].ToString().Equals(""))
                             {
                                 itemConfigApiJO.Add("createAPI", originItemJO["modalContentCreateApi"]);
                             }
@@ -276,7 +276,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     operationsItem.Add("type", type);
 
                     JObject propsJO = new JObject();
-                    if (outsideStatus(int.Parse(listItemJO["outside"].ToString())))
+                    if (listItemJO["outside"] != null && outsideStatus(int.Parse(listItemJO["outside"].ToString())))
                     {
                         propsJO.Add("outside", true);
                     }
@@ -291,35 +291,36 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         JArray itemsJA = new JArray();
                         JObject itemJO = new JObject();
 
-                        JObject originItemJO = (JObject)(listItemJO["items"][0]);
+                        JObject originItemJO = new JObject();
+                        JArray itemList = (JArray)listItemJO["items"];
 
 
-                        itemJO.Add("layout", originItemJO["modalItemsLayout"]);
-                        itemJO.Add("component", originItemJO["modalItemsComp"]);
-
-
-                        JObject itemConfigJO = new JObject();
-                        itemConfigJO.Add("layout", originItemJO["modalContentLayout"]);
-
-                        JObject itemConfigApiJO = new JObject();
-                        if (!originItemJO["modalContentUpdateApi"].ToString().Equals(""))
+                        if (itemList.Count > 0)
                         {
-                            itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
-                            itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
+                            originItemJO = (JObject)itemList[0];
+                            itemJO.Add("layout", originItemJO["modalItemsLayout"]);
+                            itemJO.Add("component", originItemJO["modalItemsComp"]);
+
+
+                            JObject itemConfigJO = new JObject();
+                            itemConfigJO.Add("layout", originItemJO["modalContentLayout"]);
+
+                            JObject itemConfigApiJO = new JObject();
+                            if (originItemJO["modalContentUpdateApi"] != null && !originItemJO["modalContentUpdateApi"].ToString().Equals(""))
+                            {
+                                itemConfigApiJO.Add("getAPI", originItemJO["modalContentUpdateApi"]);
+                                itemConfigApiJO.Add("updateAPI", originItemJO["modalContentUpdateApi"]);
+                            }
+                            else if (originItemJO["modalContentCreateApi"] != null && !originItemJO["modalContentCreateApi"].ToString().Equals(""))
+                            {
+                                itemConfigApiJO.Add("createAPI", originItemJO["modalContentCreateApi"]);
+                            }
+                            itemConfigJO.Add("API", itemConfigApiJO);
+
+                            itemConfigJO.Add("fields", handleCreateConf(fields, "add"));
+                            itemJO.Add("config", itemConfigJO);
+                            itemsJA.Add(itemJO);
                         }
-                        else if (!originItemJO["modalContentCreateApi"].ToString().Equals(""))
-                        {
-                            itemConfigApiJO.Add("createAPI", originItemJO["modalContentCreateApi"]);
-                        }
-
-                        itemConfigJO.Add("API", itemConfigApiJO);
-
-                        itemConfigJO.Add("fields", handleCreateConf(fields, "add"));
-
-                        itemJO.Add("config", itemConfigJO);
-
-
-                        itemsJA.Add(itemJO);
                         propsJO.Add("items", itemsJA);
 
                     }
