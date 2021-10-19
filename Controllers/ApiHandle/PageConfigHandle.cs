@@ -85,7 +85,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                                 styles.Add("font-weight", listItemJO["listFontWeight"]);
                             }
 
-                            if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontWeight"].ToString().Equals(""))
+                            if (listItemJO.ContainsKey("listFontColor") && !listItemJO["listFontColor"].ToString().Equals(""))
                             {
                                 styles.Add("color", listItemJO["listFontColor"]);
                             }

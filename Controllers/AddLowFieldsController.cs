@@ -74,7 +74,11 @@ namespace PageConfig.WebApi.Controllers
                 var getOriginApiStatus = getOriginApiData["code"] != null ? Convert.ToInt32(getOriginApiData["code"]) : 0;
                 if (getOriginApiStatus == 200)
                 {
-                    string originUrl = getOriginApiData["apiEndpoint"].ToString();
+                    if (!getOriginApiData.ContainsKey("data"))
+                    {
+                        return tool.MsgFormat(ResponseCode.操作失败, "获取field 列表 api 失败", "Error");
+                    }
+                    string originUrl = string.Format("{0}{1}", endpoint, getOriginApiData["data"]["apiEndpoint"].ToString());
                     JObject resJO = getOriginData(originUrl, token);
 
                     var status = resJO["code"] != null ? Convert.ToInt32(resJO["code"]) : 0;
@@ -83,39 +87,43 @@ namespace PageConfig.WebApi.Controllers
                         const string resultinfo_key = "data";
                         if (resJO.ContainsKey(resultinfo_key))
                         {
-                            JArray oListJO = (JArray)resJO[resultinfo_key];
+                            JObject dataJO = (JObject)resJO[resultinfo_key];
 
-                            if (oListJO != null && oListJO.Count > 0)
+                            if (dataJO.ContainsKey("records"))
                             {
-                                JObject originFieldsJO = (JObject)oListJO[0];
-                                int errCount = 0; //添加字段异常计算
-                                string fieldName = "";
-                                foreach (var item in originFieldsJO)
+                                JArray recordsJA = (JArray)dataJO["records"];
+                                if (recordsJA != null && recordsJA.Count > 0)
                                 {
-                                    fieldName = item.Key;
-                                    var fieldValue = item.Value;
-                                    int pId = pageId;
-                                    if (!fieldName.Equals("id"))
+                                    JObject originFieldsJO = (JObject)recordsJA[0];
+                                    int errCount = 0; //添加字段异常计算
+                                    string fieldName = "";
+                                    foreach (var item in originFieldsJO)
                                     {
-                                        int addStatus = addPageField(endpoint, fieldName, pId, token);
-                                        if (addStatus == 1)
+                                        fieldName = item.Key;
+                                        var fieldValue = item.Value;
+                                        int pId = pageId;
+                                        if (!fieldName.Equals("id"))
                                         {
-                                            errCount++;
+                                            int addStatus = addPageField(endpoint, fieldName, pId, token);
+                                            if (addStatus == 1)
+                                            {
+                                                errCount++;
+                                            }
+                                            if (errCount > 0)
+                                            {
+                                                return tool.MsgFormat(ResponseCode.操作失败, string.Format("添加 {0} 字段失败", fieldName), "Error");
+                                            }
                                         }
-                                        if (errCount > 0)
-                                        {
-                                            return tool.MsgFormat(ResponseCode.操作失败, string.Format("添加 {0} 字段失败", fieldName), "Error");
-                                        }
-                                    }
 
+                                    }
+                                }
+                                else
+                                {
+                                    return tool.MsgFormat(ResponseCode.操作失败, "records 缺少字段数据", "Error");
                                 }
                             }
-                            else
-                            {
-                                return tool.MsgFormatToJson(ResponseCode.成功, "缺少字段数据", "Success");
-                            }
 
-                            return tool.MsgFormatToJson(ResponseCode.成功, "新增成功", "Success");
+                            return tool.MsgFormat(ResponseCode.成功, "新增成功", "Success");
 
                         }
                         else
@@ -151,7 +159,7 @@ namespace PageConfig.WebApi.Controllers
 
             using (var http = new HttpClient(handler))
             {
-                string url = string.Format("{0}/api/crud/lowFields/lowFieldses");
+                string url = string.Format("{0}/api/crud/lowMainPage/lowMainPages/{1}", endpoint, pageId);
                 if (token != null && !token.Equals(""))
                 {
                     http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
