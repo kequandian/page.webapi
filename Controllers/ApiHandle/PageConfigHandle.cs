@@ -170,7 +170,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     JObject propsJO = new JObject();
 
                     #region options非必须属性
-                    if (listItemJO["requestOptions"].ToString().StartsWith("{") && listItemJO["requestOptions"].ToString().EndsWith("}"))
+                    if (listItemJO["requestOptions"] != null && listItemJO["requestOptions"].ToString().StartsWith("{") && listItemJO["requestOptions"].ToString().EndsWith("}"))
                     {
                         JObject requestOptionsJO = (JObject)JsonConvert.DeserializeObject(listItemJO["requestOptions"].ToString());
                         foreach (var rqItem in requestOptionsJO)
@@ -397,12 +397,12 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 {
                     createFieldItem = new JObject();
                     JObject listItemJO = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
-                    if (listItemJO["fieldScopes"].ToString().Contains(filterType))
+                    if (listItemJO["fieldScopes"]!=null &&listItemJO["fieldScopes"].ToString().Contains(filterType))
                     {
                         createFieldItem.Add("field", listItemJO["fieldBinding"]);
                         createFieldItem.Add("label", listItemJO["fieldLabel"]);
                         JArray rulesJA = new JArray();
-                        if (int.Parse(listItemJO["formInputRequired"].ToString()) == 1)
+                        if (listItemJO["formInputRequired"]!= null && int.Parse(listItemJO["formInputRequired"].ToString()) == 1)
                         {
                             JObject rulesItemJO = new JObject();
                             rulesItemJO.Add("type", "required");
@@ -414,19 +414,19 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                             createFieldItem.Add("rules", rulesJA);
                         }
                         JObject propsJO = new JObject();
-                        if (!listItemJO["formFieldHint"].ToString().Equals(""))
+                        if (listItemJO["formFieldHint"] != null && !listItemJO["formFieldHint"].ToString().Equals(""))
                         {
                             propsJO.Add("placeholder", listItemJO["formFieldHint"].ToString());
                             createFieldItem.Add("props", propsJO);
                         }
                         createFieldItem.Add("type", listItemJO["formInputType"]);
 
-                        if (!(listItemJO["formFieldQuestion"].ToString().Equals("")))
+                        if (listItemJO["formFieldQuestion"] != null && !(listItemJO["formFieldQuestion"].ToString().Equals("")))
                         {
                             createFieldItem.Add("toptips", listItemJO["formFieldQuestion"]);
                         }
 
-                        if (listItemJO["formInputOptions"].ToString().StartsWith("{") && listItemJO["formInputOptions"].ToString().EndsWith("}"))
+                        if (listItemJO["formInputOptions"] != null && listItemJO["formInputOptions"].ToString().StartsWith("{") && listItemJO["formInputOptions"].ToString().EndsWith("}"))
                         {
                             JObject formInputOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["formInputOptions"].ToString());
                             foreach (var fioItem in formInputOptionsJObect)
@@ -435,7 +435,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                             }
                         }
 
-                        if (listItemJO["fieldValueOptions"].ToString().StartsWith("{") && listItemJO["fieldValueOptions"].ToString().EndsWith("}"))
+                        if (listItemJO["fieldValueOptions"]!=null && listItemJO["fieldValueOptions"].ToString().StartsWith("{") && listItemJO["fieldValueOptions"].ToString().EndsWith("}"))
                         {
                             JObject fieldValueOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["fieldValueOptions"].ToString());
                             createFieldItem.Add("options", fieldValueOptionsJObect["options"]);
@@ -526,12 +526,12 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 {
                     viFieldItem = new JObject();
                     JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
-                    if (listItemJObect["fieldScopes"].ToString().Contains("view"))
+                    if (listItemJObect["fieldScopes"] != null && listItemJObect["fieldScopes"].ToString().Contains("view"))
                     {
                         viFieldItem.Add("field", listItemJObect["fieldBinding"]);
                         viFieldItem.Add("label", listItemJObect["fieldLabel"]);
 
-                        if (!listItemJObect["formViewOptions"].ToString().Equals(""))
+                        if ( listItemJObect["formViewOptions"] != null &&!listItemJObect["formViewOptions"].ToString().Equals(""))
                         {
                             JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJObect["formViewOptions"].ToString());
                             viFieldItem.Add("options", optionsJO["options"]);
