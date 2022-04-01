@@ -50,10 +50,10 @@ namespace PageConfig.WebApi.Controllers
                     return tool.MsgFormat(ResponseCode.操作失败, "缺少 endpoint 参数", "Error");
                 }
 
-                //if (jsonData["originApi"] == null)
-                //{
-                //    return tool.MsgFormat(ResponseCode.操作失败, "缺少 api 参数", "Error");
-                //}
+                if (jsonData["originApi"] == null)
+                {
+                    return tool.MsgFormat(ResponseCode.操作失败, "缺少 originApi 参数", "Error");
+                }
 
                 if (jsonData["pageId"] == null)
                 {
