@@ -183,8 +183,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     {
                         propsJO.Add("API", listItemJO["requestRefreshApi"]);
                         propsJO.Add("method", listItemJO["requestMethod"]);
-                        JObject dataJO = (JObject)JsonConvert.DeserializeObject(listItemJO["requestBody"].ToString());
-                        propsJO.Add("data", dataJO);
+                        if(listItemJO["requestBody"] != null)
+                        {
+                            JObject dataJO = (JObject)JsonConvert.DeserializeObject(listItemJO["requestBody"].ToString());
+                            propsJO.Add("data", dataJO);
+                        }
                     }
                     else if (actionType.Equals("import"))
                     {
