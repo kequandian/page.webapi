@@ -94,6 +94,13 @@ namespace PageConfig.WebApi.Controllers
                                 JArray recordsJA = (JArray)dataJO["records"];
                                 if (recordsJA != null && recordsJA.Count > 0)
                                 {
+
+                                    int deleteStatus = deletePageField(endpoint, pageId, token);
+                                    if (deleteStatus == 1)
+                                    {
+                                        return tool.MsgFormat(ResponseCode.操作失败, string.Format("清除字段失败，无法重新加载"), "Error");
+                                    }
+
                                     JObject originFieldsJO = (JObject)recordsJA[0];
                                     int errCount = 0; //添加字段异常计算
                                     string fieldName = "";
@@ -104,7 +111,7 @@ namespace PageConfig.WebApi.Controllers
                                         int pId = pageId;
                                         if (!fieldName.Equals("id"))
                                         {
-                                            int addStatus = addPageField(endpoint, fieldName, pId, token);
+                                            int addStatus = addPageField(endpoint, fieldName, pageId, token);
                                             if (addStatus == 1)
                                             {
                                                 errCount++;
@@ -270,6 +277,42 @@ namespace PageConfig.WebApi.Controllers
                 {
                     return 1;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 清除页面字段
+        /// </summary>
+        /// 
+        static int deletePageField(string endpoint, int pageId, string token)
+        {
+
+            string requestUrl = string.Format("{0}/api/crud/lowFields/lowFieldses/byPage/{1}", endpoint, pageId);
+
+            var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
+
+            using (var http = new HttpClient(handler))
+            {
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+                var task = http.DeleteAsync(requestUrl);
+                var rep = task.Result;
+                var task2 = rep.Content.ReadAsStringAsync();
+
+                JObject resJO = (JObject)JsonConvert.DeserializeObject(task2.Result);
+
+                var status = resJO["code"] != null ? Convert.ToInt32(resJO["code"]) : 0;
+                if (status == 200)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1;
+                }
+
             }
         }
 
