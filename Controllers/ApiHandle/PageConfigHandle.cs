@@ -346,14 +346,17 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     //删除
                     else if (type.Equals("delete"))
                     {
-                        if (!listItemJO["requestRefreshApi"].ToString().Equals(""))
-                        {
-                            propsJO.Add("API", listItemJO["requestRefreshApi"]);
-                            propsJO.Add("method", listItemJO["requestMethod"]);
-                        }
+                        //if (!listItemJO["requestRefreshApi"].ToString().Equals(""))
+                        //{
+                        //    propsJO.Add("API", listItemJO["requestRefreshApi"]);
+                        //    propsJO.Add("method", listItemJO["requestMethod"]);
+                        //}
                     }
 
-                    operationsItem.Add("options", propsJO);
+                    if (!type.Equals("delete"))
+                    {
+                        operationsItem.Add("options", propsJO);
+                    }
 
                     //显示/隐藏属性
                     if (listItemJO["expectField"] != null && listItemJO["expectValue"] != null && !listItemJO["expectField"].ToString().Equals("") && !listItemJO["expectValue"].ToString().Equals(""))
@@ -552,6 +555,53 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                 viewFieldItem.Add("fields", itemfieldsProps);
                 viewFields.Add(viewFieldItem);
                 return viewFields;
+            }
+            return null;
+        }
+        #endregion
+
+        #region 新详情格式
+        public JArray handleNewViewConf(JArray listFields)
+        {
+
+            if (listFields == null)
+            {
+                return null;
+            }
+            //JArray viewFields = new JArray();
+            //JObject viewFieldItem = new JObject();
+            //viewFieldItem.Add("title", "详情");
+            //viewFieldItem.Add("type", "plain");
+            JArray itemfieldsProps = new JArray();
+
+            JObject viFieldItem = null;
+            if (listFields.ToString().StartsWith("[") && listFields.ToString().EndsWith("]")) //判断是否是Json 数组
+            {
+                foreach (var listItem in listFields)
+                {
+                    viFieldItem = new JObject();
+                    JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
+                    if (listItemJObect["fieldScopes"] != null && listItemJObect["fieldScopes"].ToString().Contains("view"))
+                    {
+                        viFieldItem.Add("field", listItemJObect["fieldBinding"]);
+                        viFieldItem.Add("label", listItemJObect["fieldLabel"]);
+                        viFieldItem.Add("type", listItemJObect["formViewType"]);
+
+                        if (listItemJObect["formViewOptions"] != null && !listItemJObect["formViewOptions"].ToString().Equals(""))
+                        {
+                            JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJObect["formViewOptions"].ToString());
+                            viFieldItem.Add("options", optionsJO["options"]);
+
+                        }
+                    }
+
+                    itemfieldsProps.Add(viFieldItem);
+
+                }
+
+                //viewFieldItem.Add("fields", itemfieldsProps);
+                //viewFields.Add(viewFieldItem);
+                return itemfieldsProps;
             }
             return null;
         }

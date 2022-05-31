@@ -95,7 +95,7 @@ namespace PageConfig.WebApi.Controllers
                 //编辑
                 updateFieldsJO = handle.handleCreateConf((JArray)jsonData["lowFieldss"], "edit");
                 //详情
-                viewConfigJO = handle.handleViewConf((JArray)jsonData["lowFieldss"]);
+                viewConfigJO = handle.handleNewViewConf((JArray)jsonData["lowFieldss"]);
 
                 bodyContent.Add("pageName", pageNameJO);
                 bodyContent.Add("createFields", createFieldsJO);
