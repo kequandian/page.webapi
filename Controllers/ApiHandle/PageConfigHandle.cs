@@ -583,16 +583,34 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                     JObject listItemJObect = (JObject)JsonConvert.DeserializeObject(listItem.ToString());
                     if (listItemJObect["fieldScopes"] != null && listItemJObect["fieldScopes"].ToString().Contains("view"))
                     {
+
                         viFieldItem.Add("field", listItemJObect["fieldBinding"]);
                         viFieldItem.Add("label", listItemJObect["fieldLabel"]);
                         viFieldItem.Add("type", listItemJObect["formViewType"]);
 
-                        if (listItemJObect["formViewOptions"] != null && !listItemJObect["formViewOptions"].ToString().Equals(""))
-                        {
-                            JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJObect["formViewOptions"].ToString());
-                            viFieldItem.Add("options", optionsJO["options"]);
+                        if (listItemJObect["formViewType"].ToString().Equals("one-mary")) { 
+                            if (listItemJObect["fieldViewOneManyOptions"] != null && !listItemJObect["fieldViewOneManyOptions"].ToString().Equals(""))
+                            {
+                                JArray fieldsJA = (JArray)JsonConvert.DeserializeObject(listItemJObect["fieldViewOneManyOptions"].ToString());
 
+                                JObject optionsfieldsJO = new JObject();
+
+                                optionsfieldsJO.Add("fields", fieldsJA);
+
+                                viFieldItem.Add("options", optionsfieldsJO);
+
+                            }
                         }
+                        else
+                        {
+                            if (listItemJObect["formViewOptions"] != null && !listItemJObect["formViewOptions"].ToString().Equals(""))
+                            {
+                                JObject optionsJO = (JObject)JsonConvert.DeserializeObject(listItemJObect["formViewOptions"].ToString());
+                                viFieldItem.Add("options", optionsJO["options"]);
+
+                            }
+                        }
+
                     }
 
                     itemfieldsProps.Add(viFieldItem);
