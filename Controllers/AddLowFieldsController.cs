@@ -24,9 +24,9 @@ namespace PageConfig.WebApi.Controllers
         //private string originUrl = "";
 
 
-        private readonly ILogger<OriginDataController> _logger;
+        private readonly ILogger<AddLowFieldsController> _logger;
 
-        public AddLowFieldsController(ILogger<OriginDataController> logger)
+        public AddLowFieldsController(ILogger<AddLowFieldsController> logger)
         {
             _logger = logger;
         }

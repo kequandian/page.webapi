@@ -42,6 +42,36 @@ namespace PageConfig.WebApi
                            .WithMethods("GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS")
                              );
             });
+
+            services.AddSwaggerGen(c =>
+            {
+                // ...∆‰À˚Swagger≈‰÷√...
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Description = "Enter 'Bearer' followed by a space and then your token in the text input below.",
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,5 +97,6 @@ namespace PageConfig.WebApi
 
             app.UseCors(MyAllowSpecificOrigins);
         }
+
     }
 }

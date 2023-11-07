@@ -55,11 +55,11 @@ namespace PageConfig.WebApi.Controllers
                 JObject jsonData = (JObject)JsonConvert.DeserializeObject(jsonString);
 
                 //标题
-                pageNameJO.Add("table", jsonData["pageTitle"].ToString());
-                pageNameJO.Add("new", jsonData["formAddTitle"].ToString());
-                pageNameJO.Add("edit", jsonData["formEditTitle"].ToString());
-                pageNameJO.Add("name", jsonData["pageName"].ToString());
-                pageNameJO.Add("view", jsonData["pageName"].ToString());
+                pageNameJO.Add("table", jsonData["pageTitle"] != null ? jsonData["pageTitle"] : "");
+                pageNameJO.Add("new", jsonData["formAddTitle"] != null ? jsonData["formAddTitle"] : "");
+                pageNameJO.Add("edit", jsonData["formEditTitle"] != null ? jsonData["formEditTitle"]: "");
+                pageNameJO.Add("name", jsonData["pageName"] != null ? jsonData["pageName"] : "");
+                pageNameJO.Add("view", jsonData["formViewTitle"] != null ? jsonData["formViewTitle"] : "");
 
                 string apiEndpoint = jsonData["apiEndpoint"].ToString();
 
