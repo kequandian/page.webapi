@@ -77,7 +77,7 @@ namespace PageConfig.WebApi.Controllers
 
             #endregion
 
-            //pageId = 92;
+            //pageId = 105;
             pageId = int.Parse(createPageResponse[resultinfo_key]["id"].ToString());
             int errCount = 0;
 
@@ -166,7 +166,7 @@ namespace PageConfig.WebApi.Controllers
             {
                 
                 JObject itemObj = (JObject)listItem;
-                int addFieldStatus = addPageField("", pageId, listItem, token);
+                int addFieldStatus = addPageField("", pageId, listItem, token, obj["createFields"], obj["updateFields"], obj["viewConfig"]);
 
                 if (addFieldStatus != 0)
                 {
@@ -326,11 +326,11 @@ namespace PageConfig.WebApi.Controllers
                 }
 
                 JObject postJO = new JObject();
-                postJO.Add("path", itemData["options"]["path"]!= null ? itemData["options"]["path"] : "");
-                postJO.Add("outside", itemData["options"]["outside"] != null ? settingToFieldHandle.matchOutside(Boolean.Parse(itemData["options"]["outside"].ToString())) : 0);
-                postJO.Add("requestRefreshApi", itemData["options"]["API"] != null ? itemData["options"]["API"] : "");
-                postJO.Add("requestBody", itemData["options"]["data"] != null ? itemData["options"]["data"] : "");
-                postJO.Add("requestMethod", itemData["options"]["method"] != null ? itemData["options"]["method"] : "");
+                postJO.Add("path", itemData["options"] != null && itemData["options"]["path"]!= null ? itemData["options"]["path"] : "");
+                postJO.Add("outside", itemData["options"] != null && itemData["options"]["outside"] != null ? settingToFieldHandle.matchOutside(Boolean.Parse(itemData["options"]["outside"].ToString())) : 0);
+                postJO.Add("requestRefreshApi", itemData["options"] != null && itemData["options"]["API"] != null ? itemData["options"]["API"] : "");
+                postJO.Add("requestBody", itemData["options"] != null && itemData["options"]["data"] != null ? itemData["options"]["data"] : "");
+                postJO.Add("requestMethod", itemData["options"] != null && itemData["options"]["method"] != null ? itemData["options"]["method"] : "");
                 postJO.Add("pageId", pageId);
                 postJO.Add("requestOptions", "");
                 postJO.Add("title", itemData["title"]);
@@ -463,7 +463,7 @@ namespace PageConfig.WebApi.Controllers
         /// 添加页面字段
         /// </summary>
         /// 
-        static int addPageField(string url, int pageId, JObject fieldData, string token)
+        static int addPageField(string url, int pageId, JObject fieldData, string token, JArray createFields, JArray updateFields, JArray viewConfig)
         {
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
@@ -482,7 +482,7 @@ namespace PageConfig.WebApi.Controllers
 
                 postJO.Add("fieldLabel", fieldData["label"]);
                 postJO.Add("fieldBinding", fieldData["field"]);
-                postJO.Add("fieldScopes", "page,table,edit,add,view");
+                postJO.Add("fieldScopes", "page,table");
                 postJO.Add("listColumnType", fieldData["type"] != null ? fieldData["field"] : "plain");
                 postJO.Add("listColumnName", fieldData["field"]);
                 postJO.Add("listFontWeight", "");
@@ -506,6 +506,21 @@ namespace PageConfig.WebApi.Controllers
                 postJO.Add("formViewOptions", "");
                 postJO.Add("type", "path");
                 postJO.Add("pageId", pageId.ToString());
+
+                if(createFields != null && createFields.Count > 0)
+                {
+                    postJO = settingToFieldHandle.handleCreatePage(postJO, createFields);
+                }
+
+                if (updateFields != null && updateFields.Count > 0)
+                {
+                    postJO = settingToFieldHandle.handleEditPage(postJO, updateFields);
+                }
+
+                if (viewConfig != null && viewConfig.Count > 0)
+                {
+                    postJO = settingToFieldHandle.handleDetailPage(postJO, viewConfig);
+                }
 
                 HttpContent content = new StringContent(postJO.ToString());
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");

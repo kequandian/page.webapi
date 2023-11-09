@@ -438,10 +438,11 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
                         if (listItemJO["formInputOptions"] != null && listItemJO["formInputOptions"].ToString().StartsWith("{") && listItemJO["formInputOptions"].ToString().EndsWith("}"))
                         {
                             JObject formInputOptionsJObect = (JObject)JsonConvert.DeserializeObject(listItemJO["formInputOptions"].ToString());
-                            foreach (var fioItem in formInputOptionsJObect)
+                            /*foreach (var fioItem in formInputOptionsJObect)
                             {
                                 createFieldItem.Add(fioItem.Key.ToString(), fioItem.Value);
-                            }
+                            }*/
+                            createFieldItem.Add("options", formInputOptionsJObect);
                         }
 
                         if (listItemJO["fieldValueOptions"]!=null && listItemJO["fieldValueOptions"].ToString().StartsWith("{") && listItemJO["fieldValueOptions"].ToString().EndsWith("}"))
