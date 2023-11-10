@@ -58,7 +58,7 @@ namespace PageConfig.WebApi.Controllers
             var status = pageJsonResponse["code"] != null ? Convert.ToInt32(pageJsonResponse["code"]) : 0;
             if(status != 200)
             {
-                return tool.MsgFormat(ResponseCode.操作失败, "获取 pageSettingJson 失败", pageJsonResponse["message"].ToString());
+                return tool.MsgFormat(ResponseCode.操作失败, pageJsonResponse["message"].ToString(), "获取 pageSettingJson 失败" );
             }
 
             dynamic obj = JsonConvert.DeserializeObject(Convert.ToString(pageJsonResponse["data"]));
@@ -119,7 +119,7 @@ namespace PageConfig.WebApi.Controllers
                 if (addActionStatus != 0)
                 {
                     errCount++;
-                    return tool.MsgFormat(ResponseCode.操作失败, "新增操作按钮失败", "Error");
+                    return tool.MsgFormat(ResponseCode.操作失败, "新增action按钮失败", "Error");
                 }
             }
             if (errCount > 0)
@@ -144,7 +144,7 @@ namespace PageConfig.WebApi.Controllers
                 if (addFilterStatus != 0)
                 {
                     errCount++;
-                    return tool.MsgFormat(ResponseCode.操作失败, "新增操作按钮失败", "Error");
+                    return tool.MsgFormat(ResponseCode.操作失败, "新增搜索栏失败", "Error");
                 }
             }
             if (errCount > 0)
@@ -171,7 +171,7 @@ namespace PageConfig.WebApi.Controllers
                 if (addFieldStatus != 0)
                 {
                     errCount++;
-                    return tool.MsgFormat(ResponseCode.操作失败, "新增操作按钮失败", "Error");
+                    return tool.MsgFormat(ResponseCode.操作失败, "新增列表字段失败", "Error");
                 }
             }
 
