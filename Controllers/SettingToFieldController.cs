@@ -58,9 +58,9 @@ namespace PageConfig.WebApi.Controllers
             var status = pageJsonResponse["code"] != null ? Convert.ToInt32(pageJsonResponse["code"]) : 0;
             if(status != 200)
             {
-                //return tool.MsgFormat(ResponseCode.操作失败, pageJsonResponse["message"].ToString(), "获取 pageSettingJson 失败" );
+                return tool.MsgFormat(ResponseCode.操作失败, pageJsonResponse["message"].ToString(), "获取 pageSettingJson 失败" );
                 
-                return tool.MsgError(pageJsonResponse["message"].ToString());
+                //return tool.MsgError(pageJsonResponse["message"].ToString());
             }
 
             dynamic obj = JsonConvert.DeserializeObject(Convert.ToString(pageJsonResponse["data"]));
@@ -75,8 +75,7 @@ namespace PageConfig.WebApi.Controllers
             if (createPageStatus != 200)
             {
 
-                //return tool.MsgFormat(ResponseCode.操作失败, "创建页面失败", createPageResponse["message"].ToString());
-                return tool.MsgError("创建页面失败");
+                return tool.MsgFormat(ResponseCode.操作失败, "创建页面失败", createPageResponse["message"].ToString());
             }
 
             #endregion
