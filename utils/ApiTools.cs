@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -56,6 +57,15 @@ namespace PageConfig.WebApi.utils
                 }
             }
             return new HttpResponseMessage { Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json") };
+        }
+
+        public HttpResponseMessage MsgError(string explanation)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.BadRequest)
+            {
+                Content = new StringContent(explanation)
+            };
+            return response;
         }
     }
 }
