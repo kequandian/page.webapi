@@ -27,7 +27,7 @@ namespace PageConfig.WebApi.Controllers
         private static string testEndpoint = "http://local.static.smallsaas.cn";
         private int pageId = 0;
         //private string token = "";
-        private string testToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJvcmdJZCI6IjEiLCJ1c2VySWQiOiIxIiwidGVuYW50T3JnSWQiOjEsImFjY291bnQiOiJhZG1pbiIsInVzZXJUeXBlIjoxMDAsImRldlVzZXJUeXBlIjowLCJiVXNlclR5cGUiOiJTWVNURU0iLCJpYXQiOjE2OTkyNTU1MzEsImp0aSI6IjEiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTY5OTUxNDczMX0.TFVwj2_L0oyEh-RKPCu7sHWY_Z5Cq8dMMWwQTLRNydOCZ5Xi8CQrGa8JJKKJkHubIr8YtABmBHyKGpgUVdRl-g";
+        //private string testToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJvcmdJZCI6IjEiLCJ1c2VySWQiOiIxIiwidGVuYW50T3JnSWQiOjEsImFjY291bnQiOiJhZG1pbiIsInVzZXJUeXBlIjoxMDAsImRldlVzZXJUeXBlIjowLCJiVXNlclR5cGUiOiJTWVNURU0iLCJpYXQiOjE2OTkyNTU1MzEsImp0aSI6IjEiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTY5OTUxNDczMX0.TFVwj2_L0oyEh-RKPCu7sHWY_Z5Cq8dMMWwQTLRNydOCZ5Xi8CQrGa8JJKKJkHubIr8YtABmBHyKGpgUVdRl-g";
         //private string originUrl = "";
 
 
@@ -48,8 +48,8 @@ namespace PageConfig.WebApi.Controllers
         public HttpResponseMessage SettingJsonConvertToField(dynamic requestData)
         {
 
-            string token = testToken;
-            //string token = getToken.GetTokenFromRequest();
+            //string token = testToken;
+            string token = getToken.GetTokenFromRequest();
             //Console.WriteLine(token);
 
             dynamic reqData = JsonConvert.DeserializeObject(Convert.ToString(requestData));
