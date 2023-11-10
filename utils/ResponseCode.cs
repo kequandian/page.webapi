@@ -7,7 +7,7 @@ namespace PageConfig.WebApi.utils
 {
     public enum ResponseCode
     {
-        操作失败 = 00000,
+        操作失败 = 400,
         成功 = 200,
     }
 }
