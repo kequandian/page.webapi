@@ -72,6 +72,8 @@ namespace PageConfig.WebApi
                     }
                 });
             });
+            // ÆôÓÃ¿çÓòÖ§³Ö
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -89,6 +91,14 @@ namespace PageConfig.WebApi
             app.UseRouting();
 
             app.UseAuthorization();
+
+            // ÅäÖÃ¿çÓò²ßÂÔ
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
 
             app.UseEndpoints(endpoints =>
             {
