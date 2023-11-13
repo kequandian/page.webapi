@@ -44,7 +44,7 @@ namespace PageConfig.WebApi.Controllers
         /// <param name="requestData"></param>
         [Route("/toField")]
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         public HttpResponseMessage SettingJsonConvertToField(dynamic requestData)
         {
 
