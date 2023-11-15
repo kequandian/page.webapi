@@ -46,8 +46,8 @@ namespace PageConfig.WebApi.Controllers
 
             dynamic reqData = JsonConvert.DeserializeObject(Convert.ToString(requestData));
             string token = reqData["token"].ToString();
-            string path = reqData["path"].ToString();
-            JObject pageJsonResponse = getSettingJson(path, "");
+            JObject pageData = reqData["data"];
+            JObject pageJsonResponse = getSettingJson(pageData["path"].ToString(), "");
 
             var status = pageJsonResponse["code"] != null ? Convert.ToInt32(pageJsonResponse["code"]) : 0;
             if(status != 200)
