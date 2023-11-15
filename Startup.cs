@@ -45,7 +45,6 @@ namespace PageConfig.WebApi
 
             services.AddSwaggerGen(c =>
             {
-                // ...∆‰À˚Swagger≈‰÷√...
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {

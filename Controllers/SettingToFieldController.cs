@@ -19,17 +19,13 @@ namespace PageConfig.WebApi.Controllers
     public class SettingToFieldController
     {
         private static ApiTools tool = new ApiTools();
-        private static IHttpContextAccessor httpContextAccessor = new HttpContextAccessor();
-        private static TokenService getToken = new TokenService(httpContextAccessor);
+        //private static IHttpContextAccessor httpContextAccessor = new HttpContextAccessor();
+        //private static TokenService getToken = new TokenService(httpContextAccessor);
         private static SettingToFieldHandle settingToFieldHandle = new SettingToFieldHandle();
 
         private string endpoint = "";
         private static string testEndpoint = "http://local.static.smallsaas.cn";
         private int pageId = 0;
-        //private string token = "";
-        //private string testToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJvcmdJZCI6IjEiLCJ1c2VySWQiOiIxIiwidGVuYW50T3JnSWQiOjEsImFjY291bnQiOiJhZG1pbiIsInVzZXJUeXBlIjoxMDAsImRldlVzZXJUeXBlIjowLCJiVXNlclR5cGUiOiJTWVNURU0iLCJpYXQiOjE2OTkyNTU1MzEsImp0aSI6IjEiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTY5OTUxNDczMX0.TFVwj2_L0oyEh-RKPCu7sHWY_Z5Cq8dMMWwQTLRNydOCZ5Xi8CQrGa8JJKKJkHubIr8YtABmBHyKGpgUVdRl-g";
-        //private string originUrl = "";
-
 
         private readonly ILogger<SettingToFieldController> _logger;
 
@@ -44,16 +40,14 @@ namespace PageConfig.WebApi.Controllers
         /// <param name="requestData"></param>
         [Route("/toField")]
         [HttpPost]
-        [Authorize]
+        //[Authorize]
         public HttpResponseMessage SettingJsonConvertToField(dynamic requestData)
         {
 
-            //string token = testToken;
-            string token = getToken.GetTokenFromRequest();
-            //Console.WriteLine(token);
-
             dynamic reqData = JsonConvert.DeserializeObject(Convert.ToString(requestData));
-            JObject pageJsonResponse = getSettingJson(reqData["path"].ToString(), "");
+            string token = reqData["token"].ToString();
+            string path = reqData["path"].ToString();
+            JObject pageJsonResponse = getSettingJson(path, "");
 
             var status = pageJsonResponse["code"] != null ? Convert.ToInt32(pageJsonResponse["code"]) : 0;
             if(status != 200)
