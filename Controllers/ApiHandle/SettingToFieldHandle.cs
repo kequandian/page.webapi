@@ -33,7 +33,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         {
             foreach (JObject objItem in createFields)
             {
-                if (objItem["field"].Equals(postJO["fieldBinding"]))
+                if (objItem["field"] != null && objItem["field"].Equals(postJO["fieldBinding"]))
                 {
                     string newFieldScopes = postJO["fieldScopes"].ToString();
                     newFieldScopes = string.Format("{0},add", newFieldScopes);
@@ -64,7 +64,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         {
             foreach (JObject objItem in updateFields)
             {
-                if (objItem["field"].Equals(postJO["fieldBinding"]))
+                if (objItem["field"] != null && objItem["field"].Equals(postJO["fieldBinding"]))
                 {
                     string newFieldScopes = postJO["fieldScopes"].ToString();
                     newFieldScopes = string.Format("{0},edit", newFieldScopes);
@@ -94,7 +94,7 @@ namespace PageConfig.WebApi.Controllers.ApiHandle
         {
             foreach (JObject objItem in viewConfig)
             {
-                if (objItem["field"].Equals(postJO["fieldBinding"]))
+                if (objItem["field"] != null && objItem["field"].Equals(postJO["fieldBinding"]))
                 {
                     string newFieldScopes = postJO["fieldScopes"].ToString();
                     newFieldScopes = string.Format("{0},view", newFieldScopes);
