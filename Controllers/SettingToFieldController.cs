@@ -44,10 +44,11 @@ namespace PageConfig.WebApi.Controllers
         public HttpResponseMessage SettingJsonConvertToField(dynamic requestData)
         {
 
+            const string resultinfo_key = "data";
             dynamic reqData = JsonConvert.DeserializeObject(Convert.ToString(requestData));
             string token = reqData["token"].ToString();
-            JObject pageData = reqData["data"];
-            JObject pageJsonResponse = getSettingJson(pageData["path"].ToString(), "");
+            JObject pageData = reqData[resultinfo_key];
+            JObject pageJsonResponse = getSettingJson(pageData["path"].ToString(), token);
 
             var status = pageJsonResponse["code"] != null ? Convert.ToInt32(pageJsonResponse["code"]) : 0;
             if(status != 200)
@@ -57,13 +58,12 @@ namespace PageConfig.WebApi.Controllers
                 //return tool.MsgError(pageJsonResponse["message"].ToString());
             }
 
-            dynamic obj = JsonConvert.DeserializeObject(Convert.ToString(pageJsonResponse["data"]));
+            dynamic obj = JsonConvert.DeserializeObject(Convert.ToString(pageJsonResponse[resultinfo_key]));
 
 
             #region 获取原始数据并创建页面
             //创建页面
-            const string resultinfo_key = "data";
-            JObject createPageResponse = createPage(obj, token);
+            JObject createPageResponse = createPage(obj, pageData["menuId"].ToString(), token);
             var createPageStatus = createPageResponse["code"] != null ? Convert.ToInt32(createPageResponse["code"]) : 0;
 
             if (createPageStatus != 200)
@@ -183,16 +183,6 @@ namespace PageConfig.WebApi.Controllers
             }
             #endregion
 
-            /*//删除页面
-            if (errCount > 0)
-            {
-                int deletePageStatus = deletePage("", pageId, token);
-                if (deletePageStatus != 0)
-                {
-                    Console.WriteLine("删除页面失败");
-                }
-                return tool.MsgFormat(ResponseCode.操作失败, "转换失败", "Error");
-            }*/
 
             //获取详情
             JObject pageDetailObj = getPageDetail("", pageId, token);
@@ -253,29 +243,30 @@ namespace PageConfig.WebApi.Controllers
         /// 创建页面
         /// </summary>
         /// 
-        static JObject createPage(JObject obj, string token)
+        static JObject createPage(JObject obj, string menuId, string token)
         {
 
-            string testUrl = testEndpoint + "/api/crud/lowMainPage/lowMainPages";
+            string testUrl = testEndpoint + "/vallation/node/api/create-dynamic-page";
 
             JObject bodyContent = new JObject();
-            bodyContent.Add("formAddTitle", obj["pageName"]["new"]);
-            bodyContent.Add("searchType", obj["searchType"]);
-            bodyContent.Add("pageTitle", obj["pageName"]["table"]);
-            bodyContent.Add("formViewTitle", obj["pageName"]["view"]);
-            bodyContent.Add("formDefaultContentLayout", obj["layout"]["form"]);
+            bodyContent.Add("formAddTitle", obj["pageName"]["new"] != null ? obj["pageName"]["new"] : "");
+            bodyContent.Add("searchType", obj["searchType"] != null ? obj["searchType"] : "");
+            bodyContent.Add("pageTitle", obj["pageName"]["table"] != null ? obj["pageName"]["table"] : "");
+            bodyContent.Add("formViewTitle", obj["pageName"]["view"] != null ? obj["pageName"]["view"] : "");
+            bodyContent.Add("formDefaultContentLayout", obj["layout"]["form"] != null ? obj["layout"]["form"] : "");
             bodyContent.Add("formDefaultWidth", 0);
-            bodyContent.Add("pageName", obj["pageName"]["name"]);
-            bodyContent.Add("contentLayout", obj["layout"]["table"]);
-            bodyContent.Add("searchButtonType", obj["searchButtonType"]);
-            bodyContent.Add("apiEndpoint", obj["listAPI"]);
+            bodyContent.Add("pageName", obj["pageName"]["name"] != null ? obj["pageName"]["name"] : "");
+            bodyContent.Add("contentLayout", obj["layout"]["table"] != null ? obj["layout"]["table"] : "");
+            bodyContent.Add("searchButtonType", obj["searchButtonType"] != null ? obj["searchButtonType"] : "");
+            bodyContent.Add("apiEndpoint", obj["listAPI"] != null ? obj["listAPI"] : "");
             bodyContent.Add("columnAlign", "left");
-            bodyContent.Add("formEditTitle", obj["pageName"]["edit"]);
+            bodyContent.Add("formEditTitle", obj["pageName"]["edit"] != null ? obj["pageName"]["edit"] : "");
             bodyContent.Add("contentItemContainerStyle", "");
             bodyContent.Add("lowOperationss", "");
             bodyContent.Add("lowActionss", "");
             bodyContent.Add("lowFilterss", "");
             bodyContent.Add("lowFieldss", "");
+            bodyContent.Add("menuId", menuId);
 
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
