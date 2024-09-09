@@ -13,7 +13,7 @@ using System.Net.Http;
 namespace PageConfig.WebApi.Controllers
 {
     [ApiController]
-    [Route("/api")]
+    [Route("/pageconfig")]
     public class PageConfigController : ControllerBase
     {
         private ApiTools tool = new ApiTools();

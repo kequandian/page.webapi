@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace PageConfig.WebApi.Controllers
 {
     [ApiController]
+    [Route("[/pageconfig]")]
     public class SettingToFieldController
     {
         private static ApiTools tool = new ApiTools();

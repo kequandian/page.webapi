@@ -13,6 +13,7 @@ using System.Net.Http;
 namespace PageConfig.WebApi.Controllers
 {
     [ApiController]
+    [Route("[/pageconfig]")]
     public class AddLowFieldsController : ControllerBase
     {
 
