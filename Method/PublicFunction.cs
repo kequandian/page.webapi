@@ -14,7 +14,7 @@ namespace PageConfig.WebApi.Method
             string address = string.Empty;
             try
             {
-                Environment.GetEnvironmentVariable(AddressPathName, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.Process);
+                address = Environment.GetEnvironmentVariable(AddressPathName, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? EnvironmentVariableTarget.Machine : EnvironmentVariableTarget.Process);
             }
             catch (Exception ex)
             {
