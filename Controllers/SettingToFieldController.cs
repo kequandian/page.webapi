@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using PageConfig.WebApi.Method;
 
 namespace PageConfig.WebApi.Controllers
 {
@@ -25,7 +26,7 @@ namespace PageConfig.WebApi.Controllers
         private static SettingToFieldHandle settingToFieldHandle = new SettingToFieldHandle();
 
         private string endpoint = "";
-        private static string testEndpoint = "http://local.static.smallsaas.cn";
+        private static string testEndpoint = PublicFunction.getAddress();
         private int pageId = 0;
 
         private readonly ILogger<SettingToFieldController> _logger;
@@ -44,7 +45,6 @@ namespace PageConfig.WebApi.Controllers
         //[Authorize]
         public HttpResponseMessage SettingJsonConvertToField(dynamic requestData)
         {
-
             const string resultinfo_key = "data";
             dynamic reqData = JsonConvert.DeserializeObject(Convert.ToString(requestData));
             string token = reqData["token"].ToString();
