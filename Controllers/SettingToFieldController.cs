@@ -17,8 +17,8 @@ using PageConfig.WebApi.Method;
 namespace PageConfig.WebApi.Controllers
 {
     [ApiController]
-    [Route("[/pageconfig]")]
-    public class SettingToFieldController
+    [Route("pageconfig")]
+    public class SettingToFieldController : ControllerBase
     {
         private static ApiTools tool = new ApiTools();
         //private static IHttpContextAccessor httpContextAccessor = new HttpContextAccessor();
@@ -40,8 +40,7 @@ namespace PageConfig.WebApi.Controllers
         /// 获取原始数据并创建页面
         /// </summary>
         /// <param name="requestData"></param>
-        [Route("/toField")]
-        [HttpPost]
+        [HttpPost("toField")]
         //[Authorize]
         public HttpResponseMessage SettingJsonConvertToField(dynamic requestData)
         {

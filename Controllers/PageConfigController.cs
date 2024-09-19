@@ -13,7 +13,7 @@ using System.Net.Http;
 namespace PageConfig.WebApi.Controllers
 {
     [ApiController]
-    [Route("/pageconfig")]
+    [Route("pageconfig")]
     public class PageConfigController : ControllerBase
     {
         private ApiTools tool = new ApiTools();
@@ -30,8 +30,7 @@ namespace PageConfig.WebApi.Controllers
         /// 转换页面配置json格式
         /// </summary>
         /// <param name="pageJson"></param>
-        [Route("/toconfig")]
-        [HttpPost]
+        [HttpPost("toconfig")]
         public HttpResponseMessage ToConfig(dynamic pageJson)
         {
             try

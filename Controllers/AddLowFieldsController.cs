@@ -13,7 +13,7 @@ using System.Net.Http;
 namespace PageConfig.WebApi.Controllers
 {
     [ApiController]
-    [Route("[/pageconfig]")]
+    [Route("pageconfig")]
     public class AddLowFieldsController : ControllerBase
     {
 
@@ -36,8 +36,7 @@ namespace PageConfig.WebApi.Controllers
         /// 获取原始数据并创建页面
         /// </summary>
         /// <param name="requestData"></param>
-        [Route("/addLowFields")]
-        [HttpPost]
+        [HttpPost("addLowFields")]
         public HttpResponseMessage AddLowFields(dynamic requestData)
         {
             try
