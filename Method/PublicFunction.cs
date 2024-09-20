@@ -11,6 +11,7 @@ namespace PageConfig.WebApi.Method
 
         //地址
         static string address = string.Empty;
+            //"http://192.168.3.22:3000";
 
         #region 获取地址系统变量
         public static string getAddress()

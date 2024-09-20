@@ -218,7 +218,8 @@ namespace PageConfig.WebApi.Controllers
 
             using (var http = new HttpClient(handler))
             {
-                string url = string.Format("{0}/vallation/node/api/get-setting", testEndpoint);
+                //string url = string.Format("{0}/vallation/node/api/get-setting", testEndpoint);
+                string url = string.Format("{0}/sideapi/pageconfig/get-setting", testEndpoint);
                 if (token != null && !token.Equals(""))
                 {
                     http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
@@ -246,7 +247,7 @@ namespace PageConfig.WebApi.Controllers
         static JObject createPage(JObject obj, string menuId, string token)
         {
 
-            string testUrl = testEndpoint + "/vallation/node/api/create-dynamic-page";
+            string testUrl = testEndpoint + "/sideapi/pageconfig/create-dynamic-page";
 
             JObject bodyContent = new JObject();
             bodyContent.Add("formAddTitle", obj["pageName"]["new"] != null ? obj["pageName"]["new"] : "");
