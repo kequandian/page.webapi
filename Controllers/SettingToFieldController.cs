@@ -51,10 +51,10 @@ namespace PageConfig.WebApi.Controllers
             JObject pageJsonResponse = getSettingJson(pageData["path"].ToString(), token);
 
             var status = pageJsonResponse["code"] != null ? Convert.ToInt32(pageJsonResponse["code"]) : 0;
-            if(status != 200)
+            if (status != 200)
             {
-                return tool.MsgFormat(ResponseCode.操作失败, pageJsonResponse["message"].ToString(), "获取 pageSettingJson 失败" );
-                
+                return tool.MsgFormat(ResponseCode.操作失败, pageJsonResponse["message"].ToString(), "获取 pageSettingJson 失败");
+
                 //return tool.MsgError(pageJsonResponse["message"].ToString());
             }
 
@@ -83,9 +83,11 @@ namespace PageConfig.WebApi.Controllers
             JObject lowOperationsItem = new JObject();
             JArray tableOperationList = obj["tableOperation"];
 
+            string bb = tableOperationList.ToString();
             for (int i = 0; i < tableOperationList.Count; i++)
             {
                 JObject itemObj = (JObject)tableOperationList[i];
+                string aa = itemObj.ToString();
                 int addOptionStatus = addlowoperationss("", pageId, itemObj, token);
 
                 if (addOptionStatus != 0)
@@ -161,7 +163,7 @@ namespace PageConfig.WebApi.Controllers
             JArray tableFieldsList = obj["tableFields"];
             foreach (JObject listItem in tableFieldsList)
             {
-                
+
                 JObject itemObj = (JObject)listItem;
                 int addFieldStatus = addPageField("", pageId, listItem, token, obj["createFields"], obj["updateFields"], obj["viewConfig"]);
 
@@ -246,9 +248,6 @@ namespace PageConfig.WebApi.Controllers
         /// 
         static JObject createPage(JObject obj, string menuId, string token)
         {
-
-            string testUrl = testEndpoint + "/sideapi/pageconfig/create-dynamic-page";
-
             JObject bodyContent = new JObject();
             bodyContent.Add("formAddTitle", obj["pageName"]["new"] != null ? obj["pageName"]["new"] : "");
             bodyContent.Add("searchType", obj["searchType"] != null ? obj["searchType"] : "");
@@ -269,8 +268,12 @@ namespace PageConfig.WebApi.Controllers
             bodyContent.Add("lowFieldss", "");
             bodyContent.Add("menuId", menuId);
 
-            var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
+            string apiUrl = "api/lc/lowMainPage/lowMainPages/";
+            string testUrl = "http://gitlab2.cdnline.cn:8000/" + apiUrl;  //by zxq 目前测试地址http://gitlab2.cdnline.cn:8000/
 
+            //先请求api/lc/lowMainPage/lowMainPages
+            var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
+            JObject lowMainPagesRespose;
             using (var http = new HttpClient(handler))
             {
                 string requestUrl = testUrl;
@@ -285,11 +288,50 @@ namespace PageConfig.WebApi.Controllers
                 var rep = task.Result;
                 var task2 = rep.Content.ReadAsStringAsync();
 
-                JObject respJO = (JObject)JsonConvert.DeserializeObject(task2.Result);
-
-                return respJO;
-
+                lowMainPagesRespose = (JObject)JsonConvert.DeserializeObject(task2.Result);
             }
+            if (lowMainPagesRespose == null)
+                throw new Exception(string.Format("{0} response empty", apiUrl));
+            if (lowMainPagesRespose["code"].ToString() != "200")
+                throw new Exception(string.Format("{0} response error :{0}", apiUrl, lowMainPagesRespose["message"]));
+
+            //在返回值中取到pageID
+            string id = lowMainPagesRespose["data"]["id"].ToString();
+            if (id == string.Empty)
+                throw new Exception(string.Format("{0} response id empty", apiUrl));
+
+            //再用返回值请求api/crud/menu/menus/${id}
+            bodyContent = new JObject();
+            bodyContent.Add("pageId", id);
+            apiUrl = "api/crud/menu/menus/" + menuId;
+            testUrl = "http://gitlab2.cdnline.cn:8000/" + apiUrl;  //by zxq 目前测试地址http://gitlab2.cdnline.cn:8000/
+            JObject menusRespose;
+            handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
+            using (var http = new HttpClient(handler))
+            {
+                if (token != null && !token.Equals(""))
+                {
+                    http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                }
+
+                HttpContent content = new StringContent(bodyContent.ToString());
+                content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+                var task = http.PutAsync(testUrl, content);
+                var rep = task.Result;
+                var task2 = rep.Content.ReadAsStringAsync();
+
+                menusRespose = (JObject)JsonConvert.DeserializeObject(task2.Result);
+            }
+            if (menusRespose == null)
+                throw new Exception(string.Format("{0} response empty", apiUrl));
+            if (menusRespose["data"] == null)
+                throw new Exception(string.Format("{0} response data empty", apiUrl));
+
+            //需要返回创建成功的动态页面id
+
+            JObject data = new JObject();
+            data.Add("id", id);
+            return ResultTools.successResult(data);
         }
         #endregion
 
@@ -300,8 +342,8 @@ namespace PageConfig.WebApi.Controllers
         /// 
         static int addlowoperationss(string url, int pageId, JObject itemData, string token)
         {
-
-            string testUrl = string.Format("{0}/api/crud/lowOperations/lowOperationses", testEndpoint);
+            string testUrl = string.Format("{0}/api/lc/lowOperations/lowOperationses", "http://gitlab2.cdnline.cn:8000");  //by zxq 目前测试地址http://gitlab2.cdnline.cn:8000/
+            //string testUrl = string.Format("{0}/api/crud/lowOperations/lowOperationses", testEndpoint); //zxq
 
             var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip };
 
@@ -315,7 +357,7 @@ namespace PageConfig.WebApi.Controllers
                 }
 
                 JObject postJO = new JObject();
-                postJO.Add("path", itemData["options"] != null && itemData["options"]["path"]!= null ? itemData["options"]["path"] : "");
+                postJO.Add("path", itemData["options"] != null && itemData["options"]["path"] != null ? itemData["options"]["path"] : "");
                 postJO.Add("outside", itemData["options"] != null && itemData["options"]["outside"] != null ? settingToFieldHandle.matchOutside(Boolean.Parse(itemData["options"]["outside"].ToString())) : 0);
                 postJO.Add("requestRefreshApi", itemData["options"] != null && itemData["options"]["API"] != null ? itemData["options"]["API"] : "");
                 postJO.Add("requestBody", itemData["options"] != null && itemData["options"]["data"] != null ? itemData["options"]["data"] : "");
@@ -323,11 +365,14 @@ namespace PageConfig.WebApi.Controllers
                 postJO.Add("pageId", pageId);
                 postJO.Add("requestOptions", "");
                 postJO.Add("title", itemData["title"]);
-                postJO.Add("type", itemData["type"] != null ? itemData["type"] : "path");
+                //postJO.Add("type", "modal.update");//by zxq  成功
+                postJO.Add("type", itemData["type"] != null ? itemData["type"] : "path");//zxq
                 postJO.Add("expectField", itemData["expect"] != null && itemData["expect"]["field"] != null ? itemData["expect"]["field"] : "");
                 postJO.Add("expectValue", itemData["expect"] != null && itemData["expect"]["value"] != null ? itemData["expect"]["value"] : "");
                 postJO.Add("modalTitle", "");
                 postJO.Add("requestApi", "");
+
+                string aa = postJO.ToString();
 
                 HttpContent content = new StringContent(postJO.ToString());
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
@@ -478,7 +523,7 @@ namespace PageConfig.WebApi.Controllers
                 postJO.Add("listFontSize", "");
                 postJO.Add("listFontColor", "");
                 postJO.Add("listColumnLayout", "");
-                postJO.Add("listColumnAlign",  fieldData["align"] != null ?  fieldData["align"] : "left");
+                postJO.Add("listColumnAlign", fieldData["align"] != null ? fieldData["align"] : "left");
                 postJO.Add("listColumnWidth", fieldData["width"] != null ? fieldData["width"] : 0);
                 postJO.Add("listColumnOptions", "");
                 postJO.Add("fieldValueFilter", "");
@@ -496,7 +541,7 @@ namespace PageConfig.WebApi.Controllers
                 postJO.Add("type", "path");
                 postJO.Add("pageId", pageId.ToString());
 
-                if(createFields != null && createFields.Count > 0)
+                if (createFields != null && createFields.Count > 0)
                 {
                     postJO = settingToFieldHandle.handleCreatePage(postJO, createFields);
                 }

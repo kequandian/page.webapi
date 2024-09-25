@@ -483,3 +483,16 @@ Content-Type: application/json
 }
 
 
+###获取原始数据并创建页面
+POST {{endpoint}}/toField
+Authorization:Bearer {{token}}
+Content-Type: application/json
+
+{
+	"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJvcmdJZCI6IjEiLCJ1c2VySWQiOiIxIiwidGVuYW50T3JnSWQiOjEsImFjY291bnQiOiJhZG1pbiIsInVzZXJUeXBlIjoxMDAsImRldlVzZXJUeXBlIjowLCJiVXNlclR5cGUiOiJTWVNURU0iLCJhcHBpZCI6IiIsImlhdCI6MTcyNzE2MTU2NiwianRpIjoiMSIsInN1YiI6ImFkbWluIiwiZXhwIjoxNzI3NDIwNzY2fQ.kKuoD69KqvmSXa-lfAB0ASqZQJuPJ6vp6NmpYVXmxRjhorSY8jbAJUNFHCGuQeTnE_aUYG0lE009XumnoMEQGA",
+	"data": {
+		"pageId": "47",
+		"path": "/tenantManage/tenantManage",
+		"menuId": "47"
+	}
+}
